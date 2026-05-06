@@ -1,0 +1,2752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ARSAT Labo – Outil de Gestion de Projet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f1f5f9;color:#1e293b;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#e2e8f0}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+/* LAYOUT */
+#header{background:linear-gradient(135deg,#1e3a5f,#1e40af);border-bottom:3px solid #f59e0b;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#header h1{font-size:13px;font-weight:700;color:#fef3c7;letter-spacing:.5px}
+#header .sub{font-size:9px;color:#bfdbfe}
+#header .kpi-bar{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+#header .kpi{text-align:center;border-left:1px solid rgba(255,255,255,.2);padding-left:12px}
+#header .kpi .val{font-size:12px;font-weight:700}
+#header .kpi .lbl{font-size:8px;color:#bfdbfe;text-transform:uppercase}
+#nav{background:#ffffff;border-bottom:2px solid #e2e8f0;display:flex;overflow-x:auto;gap:0;position:sticky;top:64px;z-index:99;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.nav-btn{padding:9px 14px;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;cursor:pointer;font-family:inherit;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+.nav-btn.active{color:#1e40af;border-bottom-color:#1e40af;background:#eff6ff}
+.nav-btn:hover:not(.active){color:#1e40af;background:#f8fafc}
+#content{padding:16px 18px}
+/* CARDS */
+.card{background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-title{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;color:#334155}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+/* KPI CARDS */
+.kpi-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpi-card .k-icon{font-size:20px;margin-bottom:5px}
+.kpi-card .k-label{font-size:8px;color:#64748b;text-transform:uppercase;margin-bottom:3px;font-weight:600}
+.kpi-card .k-value{font-size:20px;font-weight:700;line-height:1.1}
+.kpi-card .k-sub{font-size:8px;color:#475569;margin-top:3px}
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:8px 8px;color:#1e40af;font-size:8px;text-transform:uppercase;border-bottom:2px solid #bfdbfe;white-space:nowrap;background:#eff6ff;font-weight:700}
+td{padding:7px 8px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:#334155}
+tr:nth-child(even){background:#f8fafc}
+tr:hover{background:#eff6ff}
+/* FORM ELEMENTS */
+input[type=text],input[type=date],input[type=number],select,textarea{background:#ffffff;color:#1e293b;border:1px solid #cbd5e1;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:11px;width:100%;transition:border .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#1e40af;box-shadow:0 0 0 3px rgba(30,64,175,.08)}
+input[type=range]{cursor:pointer;accent-color:#1e40af;width:70px}
+textarea{resize:vertical;min-height:60px}
+label{font-size:9px;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;font-weight:600;letter-spacing:.3px}
+.form-row{margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;transition:all .2s}
+.btn-primary{background:#f59e0b;color:#1c1917}
+.btn-primary:hover{background:#d97706;box-shadow:0 2px 8px rgba(245,158,11,.3)}
+.btn-danger{background:#fff;color:#dc2626;border:1.5px solid #dc2626}
+.btn-danger:hover{background:#dc2626;color:#fff}
+.btn-ghost{background:#fff;color:#475569;border:1.5px solid #cbd5e1}
+.btn-ghost:hover{color:#1e40af;border-color:#1e40af;background:#eff6ff}
+.btn-sm{padding:3px 8px;font-size:9px}
+/* BADGES */
+.badge{display:inline-block;border-radius:4px;padding:2px 7px;font-size:9px;font-weight:700}
+/* PROGRESS */
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-bar{flex:1;background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .3s}
+.prog-pct{font-weight:700;font-size:10px;min-width:30px}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #f1f5f9}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9}
+/* ALERTS */
+.alert{border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:10px;display:flex;gap:8px;align-items:flex-start}
+.alert-danger{background:#fff5f5;border:1px solid #fca5a5;color:#991b1b}
+.alert-warn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e}
+.alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1e40af}
+.alert-ok{background:#f0fdf4;border:1px solid #86efac;color:#166534}
+/* TABS */
+.sub-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.sub-tab{padding:5px 12px;border-radius:6px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer;font-family:inherit;font-size:9px;font-weight:700;text-transform:uppercase;transition:all .2s}
+.sub-tab.active{background:#1e40af;color:#fff;border-color:#1e40af}
+/* JOURNAL */
+.journal-entry{border-left:3px solid #bfdbfe;padding:10px 12px;margin-bottom:8px;background:#f8fafc;border-radius:0 8px 8px 0}
+/* TOOLTIP */
+.tip{font-size:9px;color:#475569;font-style:italic}
+/* PRINT */
+@media print{#nav,#header .kpi-bar,.btn,input[type=range],select{display:none!important}#content{padding:0}.card{border:1px solid #e2e8f0;page-break-inside:avoid;box-shadow:none}}
+/* OVERDUE */
+.overdue{color:#dc2626!important}
+.due-soon{color:#d97706!important}
+/* SECTION HEADERS */
+.section-header{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 0;margin:12px 0 6px;border-bottom:1.5px solid #e2e8f0;color:#64748b}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div style="width:38px;height:38px;background:#f59e0b;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚗</div>
+  <div>
+    <div id="h1">LABO ARSAT – Outil de Gestion de Projet</div>
+    <div class="sub">Marché N°/ARSAT/DG/DAFM/SACG/2026 • WISE GROUP / MENARA GLOBAL SERVICE • N'Djamena, Tchad • Réf. 25118-GE</div>
+  </div>
+  <div class="kpi-bar">
+    <div class="kpi"><div class="lbl">Budget TTC</div><div class="val" style="color:#fef3c7" id="h-budget">4,861 M FCFA</div></div>
+    <div class="kpi"><div class="lbl">Avancement</div><div class="val" id="h-progress" style="color:#86efac">0%</div></div>
+    <div class="kpi"><div class="lbl">Jours restants</div><div class="val" id="h-days" style="color:#1d4ed8">–</div></div>
+    <div class="kpi"><div class="lbl">Risques ouverts</div><div class="val" id="h-risks" style="color:#dc2626">–</div></div>
+    <div class="kpi"><div class="lbl">Dernière MAJ</div><div class="val" id="h-lastupdate" style="color:#bfdbfe;font-size:10px">–</div></div>
+  </div>
+  <div style="display:flex;gap:6px;flex-shrink:0">
+    <button class="btn btn-primary btn-sm" onclick="openExportModal()" title="Exporter les données avec choix du dossier et historique">💾 Exporter</button>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()" title="Importer un fichier de sauvegarde">📥 Importer</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"/>
+    <button id="undo-btn" class="btn btn-ghost btn-sm" onclick="undoLast()" style="opacity:.4;pointer-events:none" title="Aucune action à annuler">↩ Annuler</button>
+    <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Imprimer</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <button class="nav-btn active" onclick="showTab('dashboard')">◉ Tableau de Bord</button>
+  <button class="nav-btn" onclick="showTab('planning')">📅 Planning</button>
+  <button class="nav-btn" onclick="showTab('lots')">⚡ Lots Techniques</button>
+  <button class="nav-btn" onclick="showTab('budget')">💰 Budget ARSAT</button>
+  <button class="nav-btn" onclick="showTab('tresorerie')">🏦 Trésorerie</button>
+  <button class="nav-btn" onclick="showTab('equip')">⚗ Équipements</button>
+  <button class="nav-btn" onclick="showTab('risques')">⚠ Risques</button>
+  <button class="nav-btn" onclick="showTab('docs')">📋 Documents</button>
+  <button class="nav-btn" onclick="showTab('journal')">📝 Journal</button>
+  <button class="nav-btn" id="nav-admin" onclick="showTab('admin')">🔐 Admin</button>
+</div>
+
+<!-- CONTENT -->
+<div id="content"></div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-task"><div class="modal" id="modal-task-body"></div></div>
+<div class="modal-overlay" id="modal-equip"><div class="modal" id="modal-equip-body"></div></div>
+<div class="modal-overlay" id="modal-equip-add"><div class="modal" id="modal-equip-add-body" style="max-width:620px"></div></div>
+<div class="modal-overlay" id="modal-risk"><div class="modal" id="modal-risk-body"></div></div>
+<div class="modal-overlay" id="modal-journal"><div class="modal" id="modal-journal-body"></div></div>
+<div class="modal-overlay" id="modal-doc"><div class="modal" id="modal-doc-body"></div></div>
+<div class="modal-overlay" id="modal-payment"><div class="modal" id="modal-payment-body"></div></div>
+<div class="modal-overlay" id="modal-expense"><div class="modal" id="modal-expense-body"></div></div>
+<div class="modal-overlay" id="modal-lot"><div class="modal" id="modal-lot-body"></div></div>
+<div class="modal-overlay" id="modal-confirm"><div class="modal" id="modal-confirm-body"></div></div>
+<div class="modal-overlay" id="modal-export"><div class="modal" id="modal-export-body" style="max-width:620px"></div></div>
+
+<script>
+// ─── CONSTANTS ──────────────────────────────────────────────────────
+const BUDGET_TTC = 4860681781;
+const BUDGET_HT  = 4088026744;
+const EUR_XAF    = 655.957;
+const fmt = n => new Intl.NumberFormat('fr-FR').format(Math.round(n));
+const fmtM = (n,d=1) => `${(n/1e6).toFixed(d)} M`;
+const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR') : '–';
+const today = () => new Date().toISOString().split('T')[0];
+const daysLeft = d => d ? Math.ceil((new Date(d)-new Date())/86400000) : null;
+const COLOR = {acc:'#d97706',info:'#1d4ed8',ok:'#16a34a',warn:'#d97706',danger:'#dc2626',purple:'#7c3aed',pink:'#9333ea',muted:'#64748b',text:'#1e293b',border:'#e2e8f0',surf:'#f8fafc',card:'#ffffff'};
+
+// ─── STATUS CONFIGS ─────────────────────────────────────────────────
+const TASK_STATUS = {
+  'non_demarre':{label:'Non démarré',bg:'#1a2235',fg:'#64748b'},
+  'en_cours':{label:'En cours',bg:'#1e3a5f',fg:'#0ea5e9'},
+  'en_retard':{label:'En retard',bg:'#3a1010',fg:'#ef4444'},
+  'termine':{label:'Terminé',bg:'#0f2e22',fg:'#10b981'},
+  'bloque':{label:'Bloqué',bg:'#2d2a1a',fg:'#f59e0b'},
+};
+const EQ_STATUS = {
+  'pending':{label:'En attente',fg:'#64748b'},
+  'ordered':{label:'Commandé',fg:'#f59e0b'},
+  'in_production':{label:'En fabrication',fg:'#0ea5e9'},
+  'shipped':{label:'En transit',fg:'#8b5cf6'},
+  'delivered':{label:'Livré',fg:'#10b981'},
+  'installed':{label:'Installé',fg:'#a855f7'},
+  'commissioned':{label:'Commissionné',fg:'#f59e0b'},
+};
+const PAY_STATUS = {
+  'pending':{label:'En attente',fg:'#64748b'},
+  'invoiced':{label:'Facturé',fg:'#f59e0b'},
+  'paid':{label:'Payé',fg:'#10b981'},
+  'overdue':{label:'En retard',fg:'#ef4444'},
+};
+const RISK_STATUS = {
+  'open':{label:'Ouvert',fg:'#ef4444'},
+  'in_progress':{label:'En cours',fg:'#f59e0b'},
+  'closed':{label:'Clôturé',fg:'#10b981'},
+};
+const DOC_STATUS = {
+  'todo':{label:'À produire',fg:'#64748b'},
+  'submitted':{label:'Soumis',fg:'#0ea5e9'},
+  'approved':{label:'Approuvé',fg:'#10b981'},
+  'rejected':{label:'Rejeté',fg:'#ef4444'},
+  'na':{label:'N/A',fg:'#1e2d45'},
+};
+const LOT_STATUS = {
+  'not_started':{label:'Non démarré',fg:'#64748b'},
+  'tender':{label:'Appel d\'offres',fg:'#0ea5e9'},
+  'awarded':{label:'Attribué',fg:'#8b5cf6'},
+  'in_progress':{label:'En cours',fg:'#f59e0b'},
+  'delayed':{label:'En retard',fg:'#ef4444'},
+  'completed':{label:'Terminé',fg:'#10b981'},
+};
+
+function badge(text,fg,bg){
+  bg=bg||fg+'22';
+  return `<span class="badge" style="background:${bg};color:${fg}">${text}</span>`;
+}
+function taskBadge(s){const m=TASK_STATUS[s]||TASK_STATUS.non_demarre;return badge(m.label,m.fg,m.bg);}
+function eqBadge(s){const m=EQ_STATUS[s]||EQ_STATUS.pending;return badge(m.label,m.fg);}
+function payBadge(s){const m=PAY_STATUS[s]||PAY_STATUS.pending;return badge(m.label,m.fg);}
+function riskBadge(s){const m=RISK_STATUS[s]||RISK_STATUS.open;return badge(m.label,m.fg);}
+function docBadge(s){const m=DOC_STATUS[s]||DOC_STATUS.todo;return badge(m.label,m.fg);}
+function lotBadge(s){const m=LOT_STATUS[s]||LOT_STATUS.not_started;return badge(m.label,m.fg);}
+function riskColor(p,i){const s=p*i;return s>=15?COLOR.danger:s>=9?COLOR.warn:COLOR.ok;}
+function progressBar(v,color,showInput,key,fn){
+  color=color||COLOR.acc;
+  if(showInput){
+    return `<div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" style="width:${v}%;background:${color}"></div></div>
+      <input type="range" min="0" max="100" value="${v}" style="accent-color:${color}" oninput="this.nextElementSibling.textContent=this.value+'%';${fn||''}" onchange="${fn||''}">
+      <span class="prog-pct" style="color:${color}">${v}%</span>
+    </div>`;
+  }
+  return `<div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" style="width:${v}%;background:${color}"></div></div>
+    <span class="prog-pct" style="color:${color}">${v}%</span>
+  </div>`;
+}
+function selectOptions(map,current){
+  return Object.entries(map).map(([k,v])=>`<option value="${k}"${k===current?' selected':''}>${v.label}</option>`).join('');
+}
+
+// ─── DEFAULT DATA ────────────────────────────────────────────────────
+function defaultData(){
+  return {
+    meta:{lastUpdated:today(),version:3,history:[],saveCount:0,savedFolder:''},
+    subPayments:[],
+    users:[],
+    tasks:[
+      {id:1,name:'Signature contrats études environnement',phase:'Études',start:'2026-05-04',end:'2026-05-04',progress:0,status:'non_demarre',responsible:'ARSAT',comment:''},
+      {id:2,name:'Études topographiques',phase:'Études',start:'2026-05-08',end:'2026-06-02',progress:0,status:'non_demarre',responsible:'Prestataire topo',comment:''},
+      {id:3,name:'Études géotechniques (G2 AVP)',phase:'Études',start:'2026-05-08',end:'2026-06-02',progress:0,status:'non_demarre',responsible:'Prestataire géotech',comment:'Mission G2 minimum – sondages 15-20m'},
+      {id:4,name:'Études environnementales',phase:'Études',start:'2026-05-04',end:'2026-07-22',progress:0,status:'non_demarre',responsible:'Consultants env.',comment:''},
+      {id:5,name:"Études d'exécution (Wise)",phase:'Études',start:'2026-06-02',end:'2026-06-25',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:''},
+      {id:6,name:'Validation BCT Veritas',phase:'Études',start:'2026-06-25',end:'2026-07-10',progress:0,status:'non_demarre',responsible:'BCT Veritas',comment:''},
+      {id:7,name:'Permis de construire',phase:'Études',start:'2026-07-10',end:'2026-07-10',progress:0,status:'non_demarre',responsible:'ARSAT',comment:''},
+      {id:8,name:'Bon de commande équipements',phase:'Équipements',start:'2026-04-30',end:'2026-04-30',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:'1er paiement 10% TTC déclenché'},
+      {id:9,name:'Mobilisation chantier',phase:'Travaux',start:'2026-07-22',end:'2026-08-03',progress:0,status:'non_demarre',responsible:'MENARA',comment:''},
+      {id:10,name:'Exploration géologique + dessins',phase:'Travaux',start:'2026-08-03',end:'2026-09-30',progress:0,status:'non_demarre',responsible:'MENARA',comment:''},
+      {id:11,name:'Terrassements',phase:'Gros Œuvre',start:'2026-09-30',end:'2026-10-08',progress:0,status:'non_demarre',responsible:'MENARA',comment:''},
+      {id:12,name:'Fondations',phase:'Gros Œuvre',start:'2026-10-08',end:'2026-11-02',progress:0,status:'non_demarre',responsible:'MENARA',comment:'Critique – nappe phréatique'},
+      {id:13,name:'Élévations RDC',phase:'Gros Œuvre',start:'2026-11-02',end:'2026-12-03',progress:0,status:'non_demarre',responsible:'MENARA',comment:''},
+      {id:14,name:'Élévations R+1 et terrasse',phase:'Gros Œuvre',start:'2026-12-03',end:'2027-01-04',progress:0,status:'non_demarre',responsible:'MENARA',comment:''},
+      {id:15,name:'Menuiseries',phase:'Second Œuvre',start:'2027-01-05',end:'2027-01-28',progress:0,status:'non_demarre',responsible:'Sous-traitant',comment:''},
+      {id:16,name:'Peinture',phase:'Second Œuvre',start:'2027-01-15',end:'2027-04-21',progress:0,status:'non_demarre',responsible:'Sous-traitant',comment:''},
+      {id:17,name:'Faux plafonds',phase:'Second Œuvre',start:'2027-01-05',end:'2027-02-22',progress:0,status:'non_demarre',responsible:'Sous-traitant',comment:''},
+      {id:18,name:'Carrelage',phase:'Second Œuvre',start:'2027-04-21',end:'2027-06-08',progress:0,status:'non_demarre',responsible:'Sous-traitant',comment:''},
+      {id:19,name:'Installation Élec. Courant Fort (CFO)',phase:'Lots Techniques',start:'2026-09-30',end:'2027-06-14',progress:0,status:'non_demarre',responsible:'Sous-traitant CFO',comment:'ATEX requis – NFC 15.100'},
+      {id:20,name:'Installation Élec. Courant Faible (CFA)',phase:'Lots Techniques',start:'2026-09-30',end:'2027-04-26',progress:0,status:'non_demarre',responsible:'Sous-traitant CFA',comment:'NFC 90.100'},
+      {id:21,name:'Climatisation & Ventilation (HVAC)',phase:'Lots Techniques',start:'2026-09-30',end:'2027-05-12',progress:0,status:'non_demarre',responsible:'Sous-traitant HVAC',comment:'T° ext. 45°C – H14 harmattan'},
+      {id:22,name:'Détection Incendie',phase:'Lots Techniques',start:'2026-09-30',end:'2027-05-27',progress:0,status:'non_demarre',responsible:'Sous-traitant INC',comment:'NFC 12.201 – ATEX requis'},
+      {id:23,name:'Plomberie Sanitaire',phase:'Lots Techniques',start:'2026-09-30',end:'2027-05-27',progress:0,status:'non_demarre',responsible:'Sous-traitant PLB',comment:'Eau distillée + séparateur HC'},
+      {id:24,name:'Gaz Techniques',phase:'Lots Techniques',start:'2026-09-30',end:'2027-04-26',progress:0,status:'non_demarre',responsible:'Sous-traitant GAZ',comment:'Inox 316L – ATEX Zone 1 GPL'},
+      {id:25,name:'Vidéosurveillance + Contrôle Accès',phase:'Lots Techniques',start:'2026-09-30',end:'2027-05-04',progress:0,status:'non_demarre',responsible:'Sous-traitant CFA',comment:''},
+      {id:26,name:'Fabrication équipements fournisseurs',phase:'Équipements',start:'2026-04-30',end:'2026-07-07',progress:0,status:'non_demarre',responsible:'Fournisseurs',comment:'2 mois – 8 fournisseurs internationaux'},
+      {id:27,name:'Livraison équipements sur site',phase:'Équipements',start:'2027-01-25',end:'2027-06-08',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:'ARSAT gère dédouanement (Art.10)'},
+      {id:28,name:'Installation équipements labo',phase:'Équipements',start:'2027-06-08',end:'2027-07-01',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:''},
+      {id:29,name:'Commissioning équipements',phase:'Équipements',start:'2027-07-02',end:'2027-07-19',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:''},
+      {id:30,name:'Formation personnel ARSAT',phase:'Formation',start:'2027-07-02',end:'2027-08-03',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:'20 jours – Art. 18 contrat'},
+      {id:31,name:'Réception provisoire (OPR)',phase:'Réception',start:'2027-06-14',end:'2027-07-07',progress:0,status:'non_demarre',responsible:'Comité ARSAT',comment:'Art. 13 contrat'},
+      {id:32,name:'Levée des réserves',phase:'Réception',start:'2027-07-07',end:'2027-07-15',progress:0,status:'non_demarre',responsible:'WISE GROUP',comment:''},
+      {id:33,name:'Réception définitive (OPD)',phase:'Réception',start:'2027-07-15',end:'2027-07-15',progress:0,status:'non_demarre',responsible:'Comité ARSAT',comment:'Garantie 12 mois démarre'},
+      {id:34,name:'Assistance Certification Jet A1',phase:'Certification',start:'2027-07-01',end:'2027-07-19',progress:0,status:'non_demarre',responsible:'WISE GROUP + ARSAT',comment:'Art. 2 et Art. 16 contrat'},
+    ],
+    lots:[
+      {id:'CFO',name:'Électricité Courant Fort',dur:160,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:true,norms:'NFC 15.100 / 14.100 / 13.100 / 15.401 / 15.120',startDate:'2026-09-30',endDate:'2027-06-14',lastComment:'',comments:[]},
+      {id:'CFA',name:'Électricité Courant Faible',dur:130,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:true,norms:'NFC 90.100 / 90.120 / 91.100 / 15.118',startDate:'2026-09-30',endDate:'2027-04-26',lastComment:'',comments:[]},
+      {id:'HVAC',name:'Climatisation & Ventilation',dur:140,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:false,norms:'NF EN 14511 / 13779 / ISO 16890',startDate:'2026-09-30',endDate:'2027-05-12',lastComment:'',comments:[]},
+      {id:'INC',name:'Détection & Sécurité Incendie',dur:150,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:true,norms:'NFC 12.201 / NF S 61-936 / NF EN 54',startDate:'2026-09-30',endDate:'2027-05-27',lastComment:'',comments:[]},
+      {id:'PLB',name:'Plomberie & Sanitaire',dur:150,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:false,norms:'DTU 60.1 / 60.11 / NF EN 12056',startDate:'2026-09-30',endDate:'2027-05-27',lastComment:'',comments:[]},
+      {id:'GAZ',name:'Gaz Techniques',dur:130,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:true,norms:'NF EN 13480 / NF E 29-795 / NF EN ISO 10156',startDate:'2026-09-30',endDate:'2027-04-26',lastComment:'',comments:[]},
+      {id:'VSS',name:'Vidéosurveillance',dur:135,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:false,norms:'NFC 90.100',startDate:'2026-09-30',endDate:'2027-05-04',lastComment:'',comments:[]},
+      {id:'ACC',name:'Contrôle d\'Accès',dur:135,status:'not_started',progress:0,contractor:'',budgetEst:0,budgetActual:0,atex:false,norms:'NFC 90.100 / 15.118',startDate:'2026-09-30',endDate:'2027-05-04',lastComment:'',comments:[]},
+    ],
+    payments:[
+      {id:1,label:'1er versement – À la commande',pct:10,amount:Math.round(BUDGET_TTC*.10),plannedDate:'2026-04-30',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:2,label:'2ème versement – Fin des études',pct:10,amount:Math.round(BUDGET_TTC*.10),plannedDate:'2026-06-25',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:3,label:'3ème versement – Démarrage chantier',pct:20,amount:Math.round(BUDGET_TTC*.20),plannedDate:'2026-07-22',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:4,label:'4ème versement – Commande équipements',pct:40,amount:Math.round(BUDGET_TTC*.40),plannedDate:'2026-04-30',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:5,label:'5ème versement – Réception équipements',pct:10,amount:Math.round(BUDGET_TTC*.10),plannedDate:'2027-06-08',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:6,label:'6ème versement – Début mise en service',pct:5,amount:Math.round(BUDGET_TTC*.05),plannedDate:'2027-07-01',actualDate:'',invoiceNum:'',status:'pending',note:''},
+      {id:7,label:'7ème versement – Réception définitive',pct:5,amount:Math.round(BUDGET_TTC*.05),plannedDate:'2027-07-15',actualDate:'',invoiceNum:'',status:'pending',note:''},
+    ],
+    expenses:[],
+    equipments:[
+      // products: jet=Jet A1, essence=Essence SP, gasoil=Gasoil GO, fuel=Fuel Lourd, gpl=GPL/Butane
+      {id:1, name:'Appareil Point de Fumée',   model:'SP20s',        supplier:'Normalab',p1EUR:2673,  jet:true, products:['jet'],                       status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D1322 – fumée Kérosène/Jet A1'},
+      {id:2, name:'Densimètre Automatique',    model:'DMA4500M',     supplier:'MEMMERT', p1EUR:15620, jet:true, products:['jet','essence','gasoil','fuel','gpl'],status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D4052 – densité/masse volumique multiprouit'},
+      {id:4, name:'Conductimètre Digital',     model:'1153',         supplier:'MAT-LIB', p1EUR:4411,  jet:true, products:['jet','essence','gasoil'],     status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D2624 – conductivité électrostatique'},
+      {id:5, name:'Distillateur Eau',          model:'2012',         supplier:'Normalab',p1EUR:1894,  jet:false,products:[],                             status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – eau distillée pour analyses'},
+      {id:6, name:'Cristallisation JET',       model:'FZP5G2',       supplier:'MAT-LIB', p1EUR:23874, jet:true, products:['jet'],                       status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D2386 – point de cristallisation Jet A1'},
+      {id:7, name:'Couleur ASTM D1500',        model:'PFXi',         supplier:'Lovibond',p1EUR:9460,  jet:false,products:['gasoil','fuel','essence'],   status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D1500/D2500 – couleur Saybolt/ASTM Gasoil & Fuel'},
+      {id:8, name:'pH-mètre 913',              model:'913',          supplier:'MAT-LIB', p1EUR:1508,  jet:false,products:[],                            status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – eaux de process'},
+      {id:9, name:'Coulomètre KF',             model:'756KF/917',    supplier:'Metrohm', p1EUR:8686,  jet:true, products:['jet','essence','gasoil','gpl'],status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D6304 – teneur en eau (Karl Fischer)'},
+      {id:10,name:'Potentiomètre Titrando',    model:'TITRANDO 905', supplier:'MAT-LIB', p1EUR:18985, jet:true, products:['jet','essence','gasoil','fuel','gpl'],status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D3227/D974 – neutralisation, mercaptans, acidité'},
+      {id:11,name:'Analyseur FIA',             model:'P505/505C',    supplier:'Normalab',p1EUR:14731, jet:true, products:['jet','essence','gasoil'],    status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D3227 – mercaptans par injection flux analysé'},
+      {id:12,name:'Appareil Gommes',           model:'BMT 322',      supplier:'MAT-LIB', p1EUR:20388, jet:false,products:['essence','jet'],             status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D381 – résidus à l\'évaporation (gommes existantes)'},
+      {id:13,name:'Distillateur Automatique',  model:'NDI/VD10',     supplier:'MAT-LIB', p1EUR:31280, jet:false,products:['essence','gasoil','fuel'],   status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D86/D1160 – courbe de distillation Essence/Gasoil/Fuel'},
+      {id:14,name:'Point Éclair ABEL',         model:'NAB440',       supplier:'Normalab',p1EUR:23637, jet:true, products:['jet','essence'],             status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'IP 170/ASTM D56 – point éclair vase clos (Jet A1 ≥38°C)'},
+      {id:15,name:'Cryostat (bain ABEL)',      model:'TLC40',        supplier:'Normalab',p1EUR:9990,  jet:true, products:['jet','essence'],             status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support thermique pour ABEL & cristallisation'},
+      {id:16,name:'Chromètre Saybolt',         model:'EC3000 ASTM',  supplier:'ROFA',    p1EUR:5633,  jet:false,products:['jet','gasoil'],             status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D156 – couleur Saybolt (Jet A1, Gasoil clair)'},
+      {id:17,name:'App. Sel dans Bruts',       model:'941287',       supplier:'ROFA',    p1EUR:7797,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D3230 – teneur en sel (bruts pétroliers)'},
+      {id:18,name:'Balance Discovery',         model:'DV215CD',      supplier:'ROFA',    p1EUR:2366,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – pesée pour tous produits'},
+      {id:20,name:'Visco Automatique',         model:'U-VISC 210',   supplier:'Koehl',   p1EUR:15965, jet:true, products:['jet','gasoil','fuel'],      status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D445 – viscosité cinématique (Jet A1, Gasoil, Fuel)'},
+      {id:21,name:'Étuve OSI',                 model:'OSI',          supplier:'MEMMERT', p1EUR:2878,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – stabilité oxydation'},
+      {id:22,name:'Analyseur Soufre UV',       model:'9000',         supplier:'ROFA',    p1EUR:56268, jet:true, products:['jet','essence','gasoil','fuel'],status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D5453/EN ISO 20846 – soufre total UV (multiprouit)'},
+      {id:23,name:'Analyseur Cétane',          model:'CID 510',      supplier:'ROFA',    p1EUR:289664,jet:false,products:['gasoil'],                   status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D6890 – indice de cétane dérivé (Gasoil uniquement)'},
+      {id:24,name:'Bain TV HVP972',            model:'HVP972',       supplier:'Normalab',p1EUR:9712,  jet:true, products:['jet','gasoil','essence'],   status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D323/D2551 – tension de vapeur Reid (TVR)'},
+      {id:25,name:'JFTOT IV',                  model:'MARK IV',      supplier:'MAT-LIB', p1EUR:96873, jet:true, products:['jet'],                      status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D3241 – stabilité thermique oxydative Jet A1 (CRITIQUE certif.)'},
+      {id:26,name:'RGAX – GC rapide',          model:'CLARUS 580',   supplier:'ROFA',    p1EUR:147134,jet:false,products:['essence','gpl','gasoil'],   status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D2163/D6729 – composition hydrocarbures GC (Essence/GPL)'},
+      {id:27,name:'Trouble & Écoulement',      model:'CPPP-80',      supplier:'MAT-LIB', p1EUR:23874, jet:false,products:['gasoil','fuel'],            status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D2500/D97/D5773 – point de trouble, d\'écoulement, CFPP'},
+      {id:29,name:'Compteur Particules',       model:'SA1000-0U',    supplier:'ROFA',    p1EUR:21970, jet:true, products:['jet'],                      status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'IP 564/ISO 4406 – contamination particulaire Jet A1 (CRITIQUE)'},
+      {id:30,name:'Plaque Chauffante 3P',      model:'SB162-3',      supplier:'MAT-LIB', p1EUR:1751,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – chauffage auxiliaire'},
+      {id:31,name:'Génér. Vapeur Gommes',      model:'ES12',         supplier:'MAT-LIB', p1EUR:25486, jet:false,products:['essence','jet'],            status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – générateur vapeur pour essai gommes ASTM D381'},
+      {id:32,name:'PMCC',                      model:'apm-8fc',      supplier:'Normalab',p1EUR:9000,  jet:false,products:['gasoil','fuel'],            status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'ASTM D93 – point éclair Pensky-Martens vase clos (Gasoil/Fuel)'},
+      {id:33,name:'Four à Moufle',             model:'THERMOLYNE',   supplier:'ROFA',    p1EUR:5779,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – calcination, cendres'},
+      {id:34,name:'Frigo DBO',                 model:'TS606/2-i',    supplier:'MAT-LIB', p1EUR:2305,  jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – eaux de process'},
+      {id:35,name:'Titreur TA/TAC/Sulfite',    model:'29164010',     supplier:'MAT-LIB', p1EUR:16647, jet:false,products:[],                           status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Support – traitement des eaux'},
+      {id:36,name:'Cotateur Tube JFTOT (ITR)', model:'DR10',         supplier:'MAT-LIB', p1EUR:44254, jet:true, products:['jet'],                      status:'pending',orderDate:'',deliveryPlanned:'2027-01-25',deliveryActual:'',installDate:'',serialNum:'',calibDate:'',note:'Lié JFTOT IV – cotation tube dépôt ASTM D3241'},
+    ],
+    risks:[
+      {id:1,cat:'Pénalité contrat',prob:3,impact:5,title:'Retard délai contractuel – pénalité 1‰/jour Art. 15',mitigation:'Suivi hebdomadaire, alertes chemin critique, réunions chantier.',responsible:'Chef de projet',status:'open',nextReview:'2026-05-15',lastUpdate:today(),comments:[]},
+      {id:2,cat:'ATEX (CRITIQUE)',prob:4,impact:5,title:'Zones ATEX non classifiées – lots CFO/CFA/GAZ bloqués',mitigation:'Étude ATEX EN 60079-10-1 à déclencher immédiatement (bureau habilité – 3-4 semaines).',responsible:'WISE GROUP',status:'open',nextReview:'2026-05-01',lastUpdate:today(),comments:[]},
+      {id:3,cat:'Alimentation électrique',prob:5,impact:5,title:'Coupures réseau STEE-Tchad – perte analyses en cours',mitigation:'Groupe électrogène (NFC 15.401) + UPS 30min sur instruments Jet A1, ATS <10s.',responsible:'Sous-traitant CFO',status:'open',nextReview:'2026-06-01',lastUpdate:today(),comments:[]},
+      {id:4,cat:'Climatique',prob:5,impact:4,title:'Saison des pluies (juin–sept.) – chantier et nappe phréatique',mitigation:'Phasage travaux, drainage renforcé, mission G2 géotechnique obligatoire.',responsible:'Chef de projet',status:'open',nextReview:'2026-06-01',lastUpdate:today(),comments:[]},
+      {id:5,cat:'Géotechnique',prob:3,impact:5,title:'Nappe phréatique haute N\'Djamena – fondations compromises',mitigation:'G2 AVP min. (sondages 15–20m), Eurocode 7, radier général si nécessaire.',responsible:'Géotechnicien',status:'open',nextReview:'2026-06-02',lastUpdate:today(),comments:[]},
+      {id:6,cat:'Logistique',prob:2,impact:3,title:'Délais livraison équipements (ARSAT gère dédouanement Art. 10)',mitigation:'Documents export anticipés avec fournisseurs. ARSAT mandate transitaire N\'Djamena.',responsible:'ARSAT',status:'open',nextReview:'2026-07-01',lastUpdate:today(),comments:[]},
+      {id:7,cat:'Certification',prob:3,impact:5,title:'Non-conformité procédures ASTM D1655 / ISO 17025 – Jet A1 bloqué',mitigation:'Calibration COFRAC, essais interlaboratoires, accréditation ISO 17025 planifiée.',responsible:'WISE GROUP + ARSAT',status:'open',nextReview:'2027-01-01',lastUpdate:today(),comments:[]},
+      {id:8,cat:'Harmattan',prob:4,impact:3,title:'Poussière harmattan (déc.–fév.) – contamination instruments',mitigation:'Filtration H14, protection équipements pendant installation, commissioning hors période.',responsible:'Chef de projet',status:'open',nextReview:'2026-12-01',lastUpdate:today(),comments:[]},
+      {id:9,cat:'HSE contrat',prob:2,impact:4,title:'Non-conformité Plan HSE (Art. 14) – arrêt chantier possible',mitigation:'Plan HSE formalisé avant démarrage, rapports mensuels ARSAT, habilitations à jour.',responsible:'HSE WISE GROUP',status:'open',nextReview:'2026-07-22',lastUpdate:today(),comments:[]},
+      {id:10,cat:'Financier',prob:3,impact:3,title:'Délai paiement ARSAT >15j (Art. 8) – trésorerie tendue',mitigation:'Suivi factures, relance formelle J+15, avenant si nécessaire.',responsible:'DAF WISE GROUP',status:'open',nextReview:'2026-05-15',lastUpdate:today(),comments:[]},
+    ],
+    documents:[
+      {id:1,name:'Notice de sécurité',type:'Étude',required:true,status:'approved',date:'2026-04-07',version:'00',note:''},
+      {id:2,name:'Études topographiques',type:'Étude',required:true,status:'todo',date:'',version:'',note:''},
+      {id:3,name:'Rapport géotechnique (G2 AVP)',type:'Étude',required:true,status:'todo',date:'',version:'',note:'Mission G2 minimum obligatoire'},
+      {id:4,name:'Rapport étude environnementale',type:'Étude',required:true,status:'todo',date:'',version:'',note:'Validation MEPDD requise'},
+      {id:5,name:"Plans d'exécution (EXE)",type:'Plans',required:true,status:'todo',date:'',version:'',note:'Wise Engineering'},
+      {id:6,name:'Validation BCT Veritas',type:'Validation',required:true,status:'todo',date:'',version:'',note:'Jalón critique 10/07/26'},
+      {id:7,name:'Permis de construire',type:'Administratif',required:true,status:'todo',date:'',version:'',note:''},
+      {id:8,name:'Étude ATEX (EN 60079-10-1)',type:'Sécurité',required:true,status:'todo',date:'',version:'',note:'CRITIQUE – à déclencher immédiatement'},
+      {id:9,name:'Plan HSE chantier',type:'HSE',required:true,status:'todo',date:'',version:'',note:'Art. 14 contrat – avant démarrage chantier'},
+      {id:10,name:'Plan implantation chantier (PIC)',type:'Plans',required:true,status:'todo',date:'',version:'',note:''},
+      {id:11,name:'Assurances chantier',type:'Administratif',required:true,status:'todo',date:'',version:'',note:'Art. 12 contrat'},
+      {id:12,name:'Certificats fournisseurs équipements',type:'Équipements',required:true,status:'todo',date:'',version:'',note:'Conformité ASTM/ISO'},
+      {id:13,name:'Procédures essais Jet A1 (ASTM D1655)',type:'Certification',required:true,status:'todo',date:'',version:'',note:''},
+      {id:14,name:'Certificats calibration COFRAC',type:'Certification',required:true,status:'todo',date:'',version:'',note:'Tous instruments Jet A1'},
+      {id:15,name:'Accréditation ISO/CEI 17025',type:'Certification',required:true,status:'todo',date:'',version:'',note:'Avant Certification Jet A1'},
+      {id:16,name:"Certificat Certification Jet A1",type:'Certification',required:true,status:'todo',date:'',version:'',note:'Objectif 19/07/2027'},
+      {id:17,name:'PV Réception provisoire (OPR)',type:'Réception',required:true,status:'todo',date:'',version:'',note:'Art. 13 contrat'},
+      {id:18,name:'PV Réception définitive (OPD)',type:'Réception',required:true,status:'todo',date:'',version:'',note:'Art. 13 – Garantie 12 mois'},
+      {id:19,name:'Manuels exploitation & maintenance',type:'Formation',required:true,status:'todo',date:'',version:'',note:'Art. 17 contrat'},
+      {id:20,name:"Rapport d'achèvement de projet",type:'Clôture',required:true,status:'todo',date:'',version:'',note:''},
+    ],
+    journal:[
+      {id:1,date:today(),type:'decision',title:'Lancement outil de gestion de projet',description:'Initialisation du tableau de bord ARSAT. Données contractuelles intégrées (contrat WISE/MENARA – 4 860 681 781 FCFA TTC).',participants:'Chef de projet',decisions:'Démarrer suivi hebdomadaire.',note:''},
+    ],
+  };
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────
+let D = {};
+let currentTab = 'dashboard';
+
+function save(description){
+  if(window._viewOnly){console.warn('Save blocked – read-only mode');return;}
+  D.meta.lastUpdated = today();
+  if(!D.meta.history) D.meta.history=[];
+  if(!D.meta.saveCount) D.meta.saveCount=0;
+  D.meta.saveCount++;
+  // Build a short summary of changes
+  const tasks=D.tasks||[];
+  const avgProg=tasks.length?Math.round(tasks.reduce((s,t)=>s+t.progress,0)/tasks.length):0;
+  const openRisks=(D.risks||[]).filter(r=>r.status==='open').length;
+  const paidAmt=(D.payments||[]).filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const histEntry={
+    id: D.meta.saveCount,
+    datetime: new Date().toLocaleString('fr-FR'),
+    date: today(),
+    description: description || 'Mise à jour des données',
+    avancement: avgProg+'%',
+    risquesOuverts: openRisks,
+    paye: fmt(paidAmt)+' FCFA',
+    tachesTerminees: tasks.filter(t=>t.progress===100).length+'/'+tasks.length,
+  };
+  D.meta.history.unshift(histEntry);
+  D.meta.history = D.meta.history.slice(0,5); // keep last 5
+  localStorage.setItem('arsat_v3',JSON.stringify(D));
+  updateHeader();
+  showSaveNotif();
+}
+// Migration map: equipment id → products[]
+const EQ_PRODUCTS_MAP = {
+  1:['jet'], 2:['jet','essence','gasoil','fuel','gpl'], 4:['jet','essence','gasoil'],
+  5:[], 6:['jet'], 7:['gasoil','fuel','essence'], 8:[], 9:['jet','essence','gasoil','gpl'],
+  10:['jet','essence','gasoil','fuel','gpl'], 11:['jet','essence','gasoil'],
+  12:['essence','jet'], 13:['essence','gasoil','fuel'], 14:['jet','essence'],
+  15:['jet','essence'], 16:['jet','gasoil'], 17:[], 18:[],
+  20:['jet','gasoil','fuel'], 21:[], 22:['jet','essence','gasoil','fuel'],
+  23:['gasoil'], 24:['jet','gasoil','essence'], 25:['jet'], 26:['essence','gpl','gasoil'],
+  27:['gasoil','fuel'], 29:['jet'], 30:[], 31:['essence','jet'],
+  32:['gasoil','fuel'], 33:[], 34:[], 35:[], 36:['jet'],
+};
+
+function migrateEquipments(){
+  (D.equipments||[]).forEach((e,i)=>{
+    if(!e.products) e.products = EQ_PRODUCTS_MAP[e.id] || [];
+    if(!('jet' in e)) e.jet = (e.products||[]).includes('jet');
+    if(!e.priceHistory) e.priceHistory=[];
+    if(!e.addedDate) e.addedDate='';
+    if(!e.ref) e.ref='';
+    // Fix large timestamp IDs – keep as-is but ensure p1EUR is a number
+    if(typeof e.p1EUR!=='number') e.p1EUR=parseFloat(e.p1EUR)||0;
+    if(typeof e.p2EUR!=='number') e.p2EUR=parseFloat(e.p2EUR)||0;
+  });
+}
+
+function load(){
+  const s=localStorage.getItem('arsat_v3');
+  D = s ? JSON.parse(s) : defaultData();
+  if(!D.expenses) D.expenses=[];
+  if(!D.journal) D.journal=[];
+  if(!D.documents) D.documents=defaultData().documents;
+  if(!D.meta.history) D.meta.history=[];
+  if(!D.meta.saveCount) D.meta.saveCount=0;
+  if(!D.meta.savedFolder) D.meta.savedFolder='';
+  if(!D.subPayments) D.subPayments=[];
+  if(!D.users) D.users=[];
+  migrateEquipments();
+  updateHeader();
+}
+
+function updateHeader(){
+  const tasks=D.tasks||[];
+  const avg = tasks.length ? Math.round(tasks.reduce((s,t)=>s+t.progress,0)/tasks.length) : 0;
+  const days = daysLeft('2027-08-03');
+  const openRisks = (D.risks||[]).filter(r=>r.status==='open').length;
+  document.getElementById('h-progress').textContent=avg+'%';
+  document.getElementById('h-days').textContent=days!==null?(days>0?days+'j':Math.abs(days)+'j retard'):'–';
+  document.getElementById('h-days').style.color=days<30?COLOR.danger:days<90?COLOR.warn:COLOR.info;
+  document.getElementById('h-risks').textContent=openRisks;
+  document.getElementById('h-lastupdate').textContent=fmtDate(D.meta.lastUpdated);
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────
+function showTab(t){
+  // Block edit tabs for view-only users
+  if(window._viewOnly&&['admin','journal'].includes(t)){
+    alert('Accès restreint – votre profil est en lecture seule.');return;
+  }
+  currentTab=t;
+  if(t==='equip'){migrateEquipments();}
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    const map={'dashboard':'◉','planning':'📅','lots':'⚡','budget':'💰','tresorerie':'🏦','equip':'⚗','risques':'⚠','docs':'📋','journal':'📝','admin':'🔐'};
+    const btn_tab=Object.entries(map).find(([k])=>b.textContent.includes(map[k]))?.[0];
+    b.classList.toggle('active',btn_tab===t);
+  });
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────
+function render(){
+  const el=document.getElementById('content');
+  const fns={dashboard:renderDashboard,planning:renderPlanning,lots:renderLots,budget:renderBudget,tresorerie:renderTresorerie,equip:renderEquip,risques:renderRisques,docs:renderDocs,journal:renderJournal,admin:renderAdmin};
+  const viewBanner=window._viewOnly?`<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:10px;color:#92400e;display:flex;align-items:center;gap:8px">
+    👁 <strong>Mode lecture seule</strong> – Vous pouvez naviguer et consulter toutes les données, mais vous ne pouvez pas modifier, ajouter ou supprimer d'informations.
+  </div>`:'';
+  el.innerHTML=viewBanner+(fns[currentTab]||renderDashboard)();
+  bindEvents();
+}
+
+// ═══ DASHBOARD ═══════════════════════════════════════════════════════
+function renderDashboard(){
+  const tasks=D.tasks||[];
+  const lots=D.lots||[];
+  const risks=D.risks||[];
+  const docs=D.documents||[];
+  const pays=D.payments||[];
+  const equips=D.equipments||[];
+
+  const avgTask=tasks.length?Math.round(tasks.reduce((s,t)=>s+t.progress,0)/tasks.length):0;
+  const avgLots=lots.length?Math.round(lots.reduce((s,l)=>s+l.progress,0)/lots.length):0;
+  const openRisks=risks.filter(r=>r.status==='open').length;
+  const critRisks=risks.filter(r=>r.prob*r.impact>=15&&r.status==='open').length;
+  const paidAmt=pays.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const subSorties=(D.subPayments||[]).filter(p=>p.type==='sortie').reduce((s,p)=>s+(+p.amount||0),0);
+  const cashSolde=paidAmt-subSorties;
+  const docsApproved=docs.filter(d=>d.status==='approved').length;
+  const eqInstalled=equips.filter(e=>e.status==='installed'||e.status==='commissioned').length;
+  const daysToEnd=daysLeft('2027-08-03');
+  const penaDay=Math.round(BUDGET_TTC*0.001);
+
+  const phases=['Études','Gros Œuvre','Second Œuvre','Lots Techniques','Équipements','Formation','Réception','Certification'];
+  const phaseColors={Études:COLOR.info,'Gros Œuvre':COLOR.acc,'Second Œuvre':'#fbbf24','Lots Techniques':COLOR.danger,Équipements:COLOR.purple,Formation:COLOR.ok,Réception:'#ec4899',Certification:'#a855f7'};
+
+  let phaseHtml='';
+  phases.forEach(ph=>{
+    const pts=tasks.filter(t=>t.phase===ph);
+    if(!pts.length)return;
+    const avg=Math.round(pts.reduce((s,t)=>s+t.progress,0)/pts.length);
+    const col=phaseColors[ph]||COLOR.acc;
+    phaseHtml+=`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:10px">
+        <span style="font-weight:600">${ph}</span><span style="color:${col};font-weight:700">${avg}%</span>
+      </div>
+      ${progressBar(avg,col,false)}
+    </div>`;
+  });
+
+  // Alerts
+  const alerts=[];
+  const today2=today();
+  tasks.filter(t=>t.end&&t.end<today2&&t.progress<100).forEach(t=>{
+    alerts.push({type:'danger',msg:`⏱ Tâche en retard : "${t.name}" – échéance ${fmtDate(t.end)}`});
+  });
+  if(critRisks>0) alerts.push({type:'danger',msg:`⚠ ${critRisks} risque(s) CRITIQUE(S) ouvert(s) – score ≥15`});
+  const atexOk=docs.find(d=>d.name.includes('ATEX'));
+  if(atexOk&&atexOk.status==='todo') alerts.push({type:'danger',msg:'🚨 Étude ATEX (EN 60079-10-1) non démarrée – bloquant pour lots CFO/CFA/GAZ'});
+  const hse=docs.find(d=>d.name.includes('HSE'));
+  if(hse&&hse.status==='todo') alerts.push({type:'warn',msg:'⚡ Plan HSE chantier à produire avant démarrage travaux (Art. 14 contrat)'});
+  pays.filter(p=>p.plannedDate&&p.plannedDate<today2&&p.status==='pending').forEach(p=>{
+    alerts.push({type:'warn',msg:`💰 Paiement en retard : "${p.label}" – prévu ${fmtDate(p.plannedDate)}`});
+  });
+  risks.filter(r=>r.nextReview&&r.nextReview<=today2&&r.status!=='closed').forEach(r=>{
+    alerts.push({type:'warn',msg:`⚠ Révision risque : "${r.title.substring(0,50)}..." – due ${fmtDate(r.nextReview)}`});
+  });
+  if(!alerts.length) alerts.push({type:'ok',msg:'✅ Aucune alerte critique aujourd\'hui'});
+
+  const alertHtml=alerts.slice(0,6).map(a=>`<div class="alert alert-${a.type}">${a.msg}</div>`).join('');
+
+  // Recent journal
+  const jEntries=(D.journal||[]).slice(-3).reverse();
+  const journalHtml=jEntries.map(e=>`
+    <div class="journal-entry">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="color:${COLOR.acc};font-weight:700;font-size:10px">${fmtDate(e.date)}</span>
+        <span style="color:${COLOR.muted};font-size:9px">${e.type}</span>
+      </div>
+      <div style="font-weight:600;font-size:11px;margin-bottom:2px">${e.title||e.description.substring(0,50)}</div>
+      <div style="color:${COLOR.muted};font-size:9px">${(e.description||'').substring(0,100)}${e.description&&e.description.length>100?'...':''}</div>
+    </div>`).join('');
+
+  return `
+  <div class="g4" style="margin-bottom:12px">
+    ${kpiCard('💰','Budget TTC',`${fmtM(BUDGET_TTC,0)} FCFA`,'Art. 7 contrat signé',COLOR.acc)}
+    ${kpiCard('✅','Avancement global',avgTask+'%',`${tasks.filter(t=>t.progress===100).length}/${tasks.length} tâches terminées`,COLOR.ok)}
+    ${kpiCard('⚠','Risques ouverts',openRisks,`Dont ${critRisks} critique(s)`,critRisks>0?COLOR.danger:COLOR.warn)}
+    ${kpiCard('💳','Reçu ARSAT',fmtM(paidAmt,0)+' FCFA',`${((paidAmt/BUDGET_TTC)*100).toFixed(0)}% du contrat TTC`,COLOR.purple)}
+    ${kpiCard('🏦','Solde trésorerie',fmtM(cashSolde,0)+' FCFA','Entrées − Sorties prestataires',cashSolde>=0?COLOR.ok:COLOR.danger)}
+    ${kpiCard('⚗','Équipements installés',`${eqInstalled}/${equips.length}`,`${equips.filter(e=>e.jet).length} appareils Jet A1`,COLOR.info)}
+    ${kpiCard('📋','Documents approuvés',`${docsApproved}/${docs.length}`,`${docs.filter(d=>d.status==='todo').length} à produire`,docsApproved<5?COLOR.warn:COLOR.ok)}
+    ${kpiCard('⏱','Jours restants',daysToEnd!==null?(daysToEnd>0?daysToEnd+'j':Math.abs(daysToEnd)+'j retard'):'–','Fin projet : 03/08/2027',daysToEnd<30?COLOR.danger:daysToEnd<90?COLOR.warn:COLOR.info)}
+    ${kpiCard('🚨','Pénalité retard/j',fmtM(penaDay,0)+' FCFA','Plafond : '+fmtM(BUDGET_TTC*.10,0)+' (100j)',COLOR.danger)}
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="card-title" style="color:${COLOR.acc}">⏱ Avancement par phase</div>
+        ${phaseHtml}
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:${COLOR.ok}">📝 Journal récent</div>
+        ${journalHtml||'<div style="color:#64748b;font-size:10px">Aucune entrée. Ajoutez dans le Journal de Chantier.</div>'}
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="showTab('journal')">Voir tout le journal →</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title" style="color:${COLOR.danger}">🚨 Alertes & Actions requises</div>
+        ${alertHtml}
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:${COLOR.purple}">✈ Chemin critique – Certification Jet A1</div>
+        ${[
+          {d:'30/04/26',t:'Bon de commande équipements',done:false},
+          {d:'02/06/26',t:'Fin études géotechniques (G2)',done:false},
+          {d:'10/07/26',t:'Validation BCT Veritas + Permis',done:false},
+          {d:'22/07/26',t:'Démarrage chantier',done:false},
+          {d:'04/01/27',t:'Fin Gros Œuvre',done:false},
+          {d:'14/06/27',t:'Fin lots techniques',done:false},
+          {d:'08/06/27',t:'Livraison équipements',done:false},
+          {d:'19/07/27',t:'✈ CERTIFICATION JET A1',done:false},
+        ].map(j=>{
+          const d=daysLeft(j.d.split('/').reverse().join('-').replace(/(\d{2})$/,'20$1'));
+          const col=d!==null&&d<0?COLOR.ok:d!==null&&d<30?COLOR.danger:COLOR.acc;
+          return `<div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;font-size:10px">
+            <span style="color:${col};font-weight:700;min-width:68px;flex-shrink:0">${j.d}</span>
+            <span style="flex:1">${j.t}</span>
+            ${d!==null?`<span style="color:${d<0?COLOR.ok:d<30?COLOR.danger:COLOR.muted};font-size:9px">${d<0?'Passé':d+'j'}</span>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function kpiCard(icon,label,value,sub,color){
+  return `<div class="kpi-card" style="border-top:3px solid ${color}">
+    <div class="k-icon">${icon}</div>
+    <div class="k-label">${label}</div>
+    <div class="k-value" style="color:${color}">${value}</div>
+    <div class="k-sub">${sub}</div>
+  </div>`;
+}
+
+// ═══ PLANNING ════════════════════════════════════════════════════════
+function renderPlanning(){
+  const tasks=D.tasks||[];
+  const phases=[...new Set(tasks.map(t=>t.phase))];
+  const phaseColors={Études:COLOR.info,'Gros Œuvre':COLOR.acc,'Second Œuvre':'#fbbf24','Lots Techniques':COLOR.danger,Équipements:COLOR.purple,Formation:COLOR.ok,Réception:'#ec4899',Certification:'#a855f7'};
+
+  let html=`
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    ${canEdit()?'<button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Ajouter une tâche</button>':''}
+    <span style="color:${COLOR.muted};font-size:10px;margin-left:auto">${tasks.filter(t=>t.progress===100).length}/${tasks.length} tâches terminées</span>
+  </div>`;
+
+  phases.forEach(ph=>{
+    const pts=tasks.filter(t=>t.phase===ph);
+    const col=phaseColors[ph]||COLOR.acc;
+    const avg=Math.round(pts.reduce((s,t)=>s+t.progress,0)/pts.length);
+    html+=`<div class="card" style="border-left:3px solid ${col}">
+      <div class="card-title" style="color:${col}">${ph} – Avancement moyen : ${avg}%</div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Tâche</th><th>Début</th><th>Fin</th><th>Responsable</th><th>Avancement</th><th>Statut</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+        ${pts.map(t=>{
+          const dl=daysLeft(t.end);
+          const late=t.end&&t.end<today()&&t.progress<100;
+          return `<tr>
+            <td style="font-weight:600;max-width:200px">
+              ${t.name}
+              ${t.comment?`<div style="color:${COLOR.muted};font-size:9px;font-weight:400">${t.comment}</div>`:''}
+            </td>
+            <td style="white-space:nowrap">${fmtDate(t.start)}</td>
+            <td style="white-space:nowrap;color:${late?COLOR.danger:dl!==null&&dl<14?COLOR.warn:''}">${fmtDate(t.end)}${late?' ⚠':''}</td>
+            <td style="color:${COLOR.muted}">${t.responsible||'–'}</td>
+            <td style="min-width:160px">
+              <div class="prog-wrap">
+                <div class="prog-bar" style="min-width:80px"><div class="prog-fill" style="width:${t.progress}%;background:${col}"></div></div>
+                ${canEdit()?`<input type="range" min="0" max="100" value="${t.progress}" style="accent-color:${col}" onchange="updateTaskProgress(${t.id},+this.value)">`:""}
+                <span style="color:${col};font-weight:700;font-size:10px;min-width:28px">${t.progress}%</span>
+              </div>
+            </td>
+            <td>${canEdit()?`<select onchange="updateTaskStatus(${t.id},this.value)" style="background:#f8fafc;color:${(TASK_STATUS[t.status]||TASK_STATUS.non_demarre).fg};border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-family:inherit;font-size:9px">${selectOptions(TASK_STATUS,t.status)}</select>`:`<span class="badge" style="color:${(TASK_STATUS[t.status]||TASK_STATUS.non_demarre).fg}">${(TASK_STATUS[t.status]||TASK_STATUS.non_demarre).label}</span>`}</td>
+            <td style="white-space:nowrap">
+              ${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="openTaskModal(${t.id})">✏</button> <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">🗑</button>`:`<span style="color:#94a3b8;font-size:9px">👁</span>`}
+            </td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function updateTaskProgress(id,v){
+  if(!D.tasks)return;
+  const t=D.tasks.find(x=>x.id===id);
+  if(t){t.progress=v;if(v===100)t.status='termine';else if(v>0&&t.status==='non_demarre')t.status='en_cours';save();}
+  updateHeader();
+}
+function updateTaskStatus(id,v){
+  if(!D.tasks)return;
+  const t=D.tasks.find(x=>x.id===id);
+  if(t){t.status=v;save();}
+}
+function deleteTask(id){
+  if(!canEdit()){alert('Accès en lecture seule.');return;}
+  const t=(D.tasks||[]).find(x=>x.id===id);
+  confirmDialog(`Supprimer la tâche <strong>"${t?t.name:'?'}"</strong> ?<br>
+    <span style="font-size:9px;color:#64748b">Vous pourrez annuler avec "↩ Annuler".</span>`,
+    ()=>{
+      pushUndo('Suppression tâche: '+(t?t.name:'?'));
+      D.tasks=D.tasks.filter(x=>x.id!==id);
+      save('Suppression tâche');render();
+    });
+}
+function openTaskModal(id){
+  const t=id?D.tasks.find(x=>x.id===id):{id:Date.now(),name:'',phase:'Études',start:'',end:'',progress:0,status:'non_demarre',responsible:'',comment:''};
+  const phases=['Études','Gros Œuvre','Second Œuvre','Lots Techniques','Équipements','Formation','Réception','Certification'];
+  document.getElementById('modal-task-body').innerHTML=`
+    <h3>${id?'Modifier la tâche':'Nouvelle tâche'}</h3>
+    <div class="form-row"><label>Nom de la tâche</label><input type="text" id="t-name" value="${t.name}"></div>
+    <div class="form-grid">
+      <div class="form-row"><label>Phase</label><select id="t-phase">${phases.map(p=>`<option value="${p}"${p===t.phase?' selected':''}>${p}</option>`).join('')}</select></div>
+      <div class="form-row"><label>Responsable</label><input type="text" id="t-resp" value="${t.responsible||''}"></div>
+      <div class="form-row"><label>Date début</label><input type="date" id="t-start" value="${t.start}"></div>
+      <div class="form-row"><label>Date fin</label><input type="date" id="t-end" value="${t.end}"></div>
+      <div class="form-row"><label>Avancement (%)</label><input type="number" id="t-prog" value="${t.progress}" min="0" max="100"></div>
+      <div class="form-row"><label>Statut</label><select id="t-status">${selectOptions(TASK_STATUS,t.status)}</select></div>
+    </div>
+    <div class="form-row"><label>Commentaire / Note</label><textarea id="t-comment">${t.comment||''}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-task')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveTask(${t.id},${!!id})">Enregistrer</button>
+    </div>`;
+  openModal('modal-task');
+}
+function saveTask(id,isEdit){if(!canEdit()){alert('Accès en lecture seule.');return;}
+  const t={id,name:v('t-name'),phase:v('t-phase'),start:v('t-start'),end:v('t-end'),progress:+v('t-prog'),status:v('t-status'),responsible:v('t-resp'),comment:v('t-comment')};
+  if(isEdit){const i=D.tasks.findIndex(x=>x.id===id);D.tasks[i]=t;}else{D.tasks.push(t);}
+  save();closeModal('modal-task');render();
+}
+
+// ═══ LOTS ════════════════════════════════════════════════════════════
+function renderLots(){
+  const lots=D.lots||[];
+  const riskColor2={critical:COLOR.danger,high:COLOR.warn,medium:COLOR.acc,low:COLOR.ok};
+  const riskLvl={CFO:'critical',CFA:'high',HVAC:'critical',INC:'critical',PLB:'medium',GAZ:'critical',VSS:'low',ACC:'medium'};
+
+  return `
+  <div class="alert alert-danger">⚡ Rappel Art. 14 contrat – Plan HSE obligatoire avant démarrage. Étude ATEX (EN 60079-10-1) à déclencher en priorité pour les lots CFO, CFA, INC et GAZ.</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <span style="color:${COLOR.muted};font-size:10px">Tous les lots démarrent le 30/09/2026 • Durée de 130 à 160 jours</span>
+  </div>
+  ${lots.map(l=>{
+    const rl=riskLvl[l.id]||'medium';
+    const col=riskColor2[rl];
+    return `
+    <div class="card" style="border-left:3px solid ${col}">
+      <div class="card-title">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="color:${COLOR.info};font-weight:700">[${l.id}]</span>
+          <span style="color:white;font-size:12px">${l.name}</span>
+          ${l.atex?`<span class="badge" style="background:#fff5f5;color:${COLOR.danger}">⚠ ATEX</span>`:''}
+          ${lotBadge(l.status)}
+          <span class="badge" style="color:${col}">${rl.toUpperCase()}</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openLotModal('${l.id}')">✏ Modifier</button>
+      </div>
+      <div class="g2" style="margin-bottom:8px">
+        <div>
+          <div style="font-size:9px;color:${COLOR.muted};margin-bottom:4px">PRESTATAIRE : <strong style="color:white">${l.contractor||'Non attribué'}</strong></div>
+          <div style="font-size:9px;color:${COLOR.muted}">Période : ${fmtDate(l.startDate)} → ${fmtDate(l.endDate)} (${l.dur}j)</div>
+          <div style="font-size:9px;color:${COLOR.muted};margin-top:3px">Normes : <span style="color:${COLOR.info}">${l.norms}</span></div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:${COLOR.muted};margin-bottom:3px">Budget estimé : <strong style="color:${COLOR.acc}">${l.budgetEst?fmt(l.budgetEst)+' FCFA':'À compléter'}</strong></div>
+          <div style="font-size:9px;color:${COLOR.muted}">Dépensé : <strong style="color:${COLOR.ok}">${l.budgetActual?fmt(l.budgetActual)+' FCFA':'0'}</strong></div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:9px;color:${COLOR.muted};margin-bottom:3px">AVANCEMENT</div>
+        <div class="prog-wrap">
+          <div class="prog-bar" style="flex:1"><div class="prog-fill" style="width:${l.progress}%;background:${col}"></div></div>
+          <input type="range" min="0" max="100" value="${l.progress}" style="accent-color:${col}" onchange="updateLotProgress('${l.id}',+this.value)">
+          <span style="color:${col};font-weight:700;font-size:11px;min-width:32px">${l.progress}%</span>
+        </div>
+      </div>
+      ${l.lastComment?`<div style="font-size:10px;color:#475569;background:#f8fafc;padding:6px 8px;border-radius:4px;margin-bottom:6px">💬 ${l.lastComment}</div>`:''}
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="text" placeholder="Ajouter un commentaire..." id="lot-comment-${l.id}" style="flex:1">
+        <button class="btn btn-ghost btn-sm" onclick="addLotComment('${l.id}')">Ajouter</button>
+      </div>
+      ${l.comments&&l.comments.length?`<div style="margin-top:6px;max-height:80px;overflow-y:auto">${l.comments.slice(-3).reverse().map(c=>`<div style="font-size:9px;color:${COLOR.muted};border-bottom:1px solid #f1f5f9;padding:3px 0"><span style="color:${COLOR.acc}">${fmtDate(c.date)}</span> – ${c.text}</div>`).join('')}</div>`:''}
+    </div>`;
+  }).join('')}`;
+}
+
+function updateLotProgress(id,v){
+  const l=D.lots.find(x=>x.id===id);
+  if(l){l.progress=v;if(v===100)l.status='completed';else if(v>0&&l.status==='not_started')l.status='in_progress';save();}
+  updateHeader();
+}
+function addLotComment(id){
+  const inp=document.getElementById('lot-comment-'+id);
+  if(!inp||!inp.value.trim())return;
+  const l=D.lots.find(x=>x.id===id);
+  if(l){if(!l.comments)l.comments=[];l.comments.push({date:today(),text:inp.value.trim()});l.lastComment=inp.value.trim();save();render();}
+}
+function openLotModal(id){
+  const l=D.lots.find(x=>x.id===id);
+  if(!l)return;
+  document.getElementById('modal-lot-body').innerHTML=`
+    <h3>Modifier – ${l.name}</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Prestataire</label><input type="text" id="l-contractor" value="${l.contractor||''}"></div>
+      <div class="form-row"><label>Statut</label><select id="l-status">${selectOptions(LOT_STATUS,l.status)}</select></div>
+      <div class="form-row"><label>Budget estimé (FCFA)</label><input type="number" id="l-budget" value="${l.budgetEst||0}"></div>
+      <div class="form-row"><label>Dépensé réel (FCFA)</label><input type="number" id="l-actual" value="${l.budgetActual||0}"></div>
+      <div class="form-row"><label>Date début réelle</label><input type="date" id="l-start" value="${l.startDate||''}"></div>
+      <div class="form-row"><label>Date fin prévue</label><input type="date" id="l-end" value="${l.endDate||''}"></div>
+    </div>
+    <div class="form-row"><label>Dernière note</label><textarea id="l-comment">${l.lastComment||''}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-lot')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveLot('${id}')">Enregistrer</button>
+    </div>`;
+  openModal('modal-lot');
+}
+function saveLot(id){
+  const l=D.lots.find(x=>x.id===id);
+  if(l){l.contractor=v('l-contractor');l.status=v('l-status');l.budgetEst=+v('l-budget');l.budgetActual=+v('l-actual');l.startDate=v('l-start');l.endDate=v('l-end');l.lastComment=v('l-comment');save();}
+  closeModal('modal-lot');render();
+}
+
+
+function updatePaymentAmount(id,val){
+  if(!canEdit()){alert('Accès en lecture seule.');return;}
+  const p=(D.payments||[]).find(x=>x.id===id);
+  if(p){
+    pushUndo('Modification montant versement: '+p.label);
+    p.amount=val;
+    save('Montant versement modifié: '+p.label+' → '+fmt(val)+' FCFA');
+    updateHeader();
+  }
+}
+// ═══ BUDGET ══════════════════════════════════════════════════════════
+function renderBudget(){
+  const pays=D.payments||[];
+  const exps=D.expenses||[];
+  const paidAmt=pays.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const subSorties=(D.subPayments||[]).filter(p=>p.type==='sortie').reduce((s,p)=>s+(+p.amount||0),0);
+  const cashSolde=paidAmt-subSorties;
+  const expTotal=exps.reduce((s,e)=>s+(+e.amount||0),0);
+  const penaDay=Math.round(BUDGET_TTC*0.001);
+
+  return `
+  <div class="g4" style="margin-bottom:12px">
+    ${kpiCard('💰','Montant TTC',fmt(BUDGET_TTC)+' FCFA','4 088 026 744 FCFA HT',COLOR.acc)}
+    ${kpiCard('✅','Total payé',fmt(paidAmt)+' FCFA',((paidAmt/BUDGET_TTC)*100).toFixed(1)+'% du contrat',COLOR.ok)}
+    ${kpiCard('⏳','Solde à payer',fmt(BUDGET_TTC-paidAmt)+' FCFA',pays.filter(p=>p.status!=='paid').length+' versements restants',COLOR.warn)}
+    ${kpiCard('🚨','Pénalité/jour retard',fmt(penaDay)+' FCFA','Plafond 10% = '+fmt(Math.round(BUDGET_TTC*.10))+' FCFA',COLOR.danger)}
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title" style="color:${COLOR.acc}">💳 Échéancier de paiement – Art. 8 (7 jalons)
+      <div style="height:6px;background:#e2e8f0;border-radius:3px;flex:1;max-width:200px;margin:0 12px;align-self:center">
+        <div style="height:6px;background:${COLOR.ok};border-radius:3px;width:${(paidAmt/BUDGET_TTC)*100}%"></div>
+      </div>
+    </div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>#</th><th>Description</th><th>%</th><th>Montant FCFA</th><th>Date prévue</th><th>Date réelle</th><th>N° Facture</th><th>Statut</th><th>Note</th><th>Action</th></tr></thead>
+      <tbody>
+      ${pays.map(p=>{
+        const late=p.plannedDate&&p.plannedDate<today()&&p.status!=='paid';
+        return `<tr>
+          <td style="font-weight:700;color:${COLOR.info}">${p.id}</td>
+          <td style="font-weight:600">${p.label}</td>
+          <td style="color:${COLOR.acc};font-weight:700">${p.pct}%</td>
+          <td>
+            ${canEdit()?`<input type="number" value="${p.amount}" min="0"
+              onchange="updatePaymentAmount(${p.id},+this.value)"
+              style="width:110px;border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:10px;font-weight:700;color:${COLOR.ok};background:#f0fdf4;font-family:inherit">`
+            :`<span style="color:${COLOR.ok};font-weight:700">${fmt(p.amount)}</span>`}
+          </td>
+          <td style="color:${late?COLOR.danger:''};white-space:nowrap">${fmtDate(p.plannedDate)}${late?' ⚠':''}</td>
+          <td style="color:${COLOR.ok}">${fmtDate(p.actualDate)||'–'}</td>
+          <td style="color:${COLOR.muted}">${p.invoiceNum||'–'}</td>
+          <td>${payBadge(p.status)}</td>
+          <td style="color:${COLOR.muted};max-width:120px;font-size:9px">${p.note||''}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="openPaymentModal(${p.id})">✏</button></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+      <tfoot><tr style="border-top:2px solid ${COLOR.acc}">
+        <td colspan="3" style="font-weight:700;color:${COLOR.acc}">TOTAL TTC</td>
+        <td style="font-weight:700;color:${COLOR.acc}">${fmt(BUDGET_TTC)}</td>
+        <td colspan="5" style="color:${COLOR.muted};font-size:9px">Factures payables sous 15j (Art. 8) • 1 EUR = 655,957 FCFA</td>
+        <td></td>
+      </tr></tfoot>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:${COLOR.warn}">📊 Dépenses & Suivi financier
+      <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Ajouter dépense</button>
+    </div>
+    ${exps.length===0?`<div style="color:${COLOR.muted};font-size:10px;text-align:center;padding:20px">Aucune dépense enregistrée. Cliquez sur "+ Ajouter dépense" pour commencer le suivi.</div>`:`
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant FCFA</th><th>Statut</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${exps.map((e,i)=>`<tr>
+        <td>${fmtDate(e.date)}</td>
+        <td>${badge(e.category,COLOR.info)}</td>
+        <td>${e.description}</td>
+        <td style="color:${COLOR.warn};font-weight:700">${fmt(e.amount)}</td>
+        <td>${badge(e.status,e.status==='paid'?COLOR.ok:COLOR.warn)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteExpense(${i})">🗑</button></td>
+      </tr>`).join('')}
+      </tbody>
+      <tfoot><tr style="border-top:2px solid ${COLOR.warn}">
+        <td colspan="3" style="font-weight:700;color:${COLOR.warn}">TOTAL DÉPENSES</td>
+        <td style="color:${COLOR.warn};font-weight:700">${fmt(expTotal)}</td>
+        <td colspan="2"></td>
+      </tr></tfoot>
+    </table></div>`}
+
+    <div class="card" style="margin-top:12px;background:#f8fafc;border-color:#3a1010">
+      <div style="font-weight:700;color:${COLOR.danger};font-size:10px;margin-bottom:8px">⚠ Simulation pénalités de retard – Art. 15 (1‰/jour, plafond 10%)</div>
+      <div class="g4">
+        ${[1,7,30,100].map(j=>`<div style="background:#fff5f5;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:${COLOR.muted}">Retard ${j}j</div>
+          <div style="font-size:16px;font-weight:700;color:${COLOR.danger}">${fmtM(penaDay*j,0)}</div>
+          <div style="font-size:9px;color:${COLOR.muted}">${((penaDay*j/BUDGET_TTC)*100).toFixed(2)}%</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function openPaymentModal(id){
+  const p=D.payments.find(x=>x.id===id);
+  if(!p)return;
+  document.getElementById('modal-payment-body').innerHTML=`
+    <h3>Mettre à jour – ${p.label}</h3>
+    <div style="background:#dbeafe;border-radius:6px;padding:10px;margin-bottom:12px;text-align:center">
+      <div style="font-size:9px;color:${COLOR.muted}">Montant</div>
+      <div style="font-size:22px;font-weight:700;color:${COLOR.ok}">${fmt(p.amount)} FCFA (${p.pct}%)</div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>Date de paiement réelle</label><input type="date" id="p-actual" value="${p.actualDate||''}"></div>
+      <div class="form-row"><label>N° de facture</label><input type="text" id="p-invoice" value="${p.invoiceNum||''}"></div>
+      <div class="form-row"><label>Statut</label><select id="p-status">${selectOptions(PAY_STATUS,p.status)}</select></div>
+      <div></div>
+    </div>
+    <div class="form-row"><label>Note</label><textarea id="p-note">${p.note||''}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-payment')">Annuler</button>
+      <button class="btn btn-primary" onclick="savePayment(${id})">Enregistrer</button>
+    </div>`;
+  openModal('modal-payment');
+}
+function savePayment(id){
+  const p=D.payments.find(x=>x.id===id);
+  if(p){p.actualDate=v('p-actual');p.invoiceNum=v('p-invoice');p.status=v('p-status');p.note=v('p-note');save();}
+  closeModal('modal-payment');render();
+}
+function openExpenseModal(){
+  const cats=['Études','Travaux GO','Travaux SO','Lots Techniques','Équipements','Formation','Frais généraux','Autre'];
+  document.getElementById('modal-expense-body').innerHTML=`
+    <h3>Nouvelle dépense</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Date</label><input type="date" id="e-date" value="${today()}"></div>
+      <div class="form-row"><label>Catégorie</label><select id="e-cat">${cats.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="form-row"><label>Montant (FCFA)</label><input type="number" id="e-amount" placeholder="0"></div>
+      <div class="form-row"><label>Statut</label><select id="e-status"><option value="pending">En attente</option><option value="paid">Payé</option></select></div>
+    </div>
+    <div class="form-row"><label>Description</label><input type="text" id="e-desc" placeholder="Description de la dépense..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-expense')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Enregistrer</button>
+    </div>`;
+  openModal('modal-expense');
+}
+function saveExpense(){
+  D.expenses.push({date:v('e-date'),category:v('e-cat'),description:v('e-desc'),amount:+v('e-amount'),status:v('e-status')});
+  save();closeModal('modal-expense');render();
+}
+function deleteExpense(i){
+  confirmDialog('Supprimer cette dépense ?',()=>{D.expenses.splice(i,1);save();render();});
+}
+
+// ═══ EQUIPEMENTS ═════════════════════════════════════════════════════
+// Product config: key → {label, icon, color, norm}
+const PRODUCTS = {
+  jet:     {label:'Jet A1',     icon:'✈', color:'#ef4444', norm:'ASTM D1655 / DEF STAN 91-091'},
+  essence: {label:'Essence SP', icon:'⛽', color:'#f59e0b', norm:'EN 228'},
+  gasoil:  {label:'Gasoil GO',  icon:'🛢', color:'#0ea5e9', norm:'EN 590'},
+  fuel:    {label:'Fuel Lourd', icon:'⚓', color:'#8b5cf6', norm:'ISO 8217'},
+  gpl:     {label:'GPL/Butane', icon:'🔵', color:'#10b981', norm:'EN 589'},
+};
+
+function productBadge(key){
+  const p=PRODUCTS[key];if(!p)return '';
+  return `<span class="badge" style="background:${p.color}22;color:${p.color};margin:1px" title="${p.norm}">${p.icon} ${p.label}</span>`;
+}
+
+function renderEquip(){
+  const equips=D.equipments||[];
+  if(!window._eqFilter) window._eqFilter='all';
+  if(!window._eqSupplier) window._eqSupplier='all';
+  const filter=window._eqFilter;
+  const supplierFilter=window._eqSupplier;
+
+  // All unique suppliers
+  const allSuppliers=[...new Set(equips.map(e=>e.supplier).filter(Boolean))].sort();
+
+  // Filter logic
+  const filtered = equips.filter(e=>{
+    const prodOk=(()=>{
+      if(filter==='all') return true;
+      if(filter==='ordered') return ['ordered','in_production','shipped','delivered','installed','commissioned'].includes(e.status);
+      const prods=e.products||[];
+      if(filter==='jet') return e.jet || prods.includes('jet');
+      return prods.includes(filter);
+    })();
+    const supplierOk = supplierFilter==='all' || e.supplier===supplierFilter;
+    return prodOk && supplierOk;
+  });
+
+  const totalFCFA=Math.round(equips.reduce((s,e)=>s+e.p1EUR,0)*EUR_XAF);
+  const jetCount=equips.filter(e=>e.jet||((e.products||[]).includes('jet'))).length;
+  const installed=equips.filter(e=>['installed','commissioned'].includes(e.status)).length;
+
+  // Per-product counts for KPIs
+  const prodCounts=Object.fromEntries(Object.keys(PRODUCTS).map(k=>[k,equips.filter(e=>(e.products||[]).includes(k)).length]));
+
+  const filterBtns = [
+    {k:'all',   label:'Tous ('+equips.length+')',        color:''},
+    {k:'jet',   label:'✈ Jet A1 ('+prodCounts.jet+')',   color:PRODUCTS.jet.color},
+    {k:'essence',label:'⛽ Essence ('+prodCounts.essence+')',color:PRODUCTS.essence.color},
+    {k:'gasoil', label:'🛢 Gasoil ('+prodCounts.gasoil+')',  color:PRODUCTS.gasoil.color},
+    {k:'fuel',   label:'⚓ Fuel Lourd ('+prodCounts.fuel+')',color:PRODUCTS.fuel.color},
+    {k:'gpl',    label:'🔵 GPL/Butane ('+prodCounts.gpl+')', color:PRODUCTS.gpl.color},
+    {k:'ordered',label:'📦 En commande+',                 color:COLOR.purple},
+  ];
+
+  return `
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px">
+    ${kpiCard('⚗','Total (best price)',fmt(totalFCFA)+' FCFA',equips.length+' appareils – 8 fournisseurs',COLOR.purple)}
+    ${Object.entries(PRODUCTS).map(([k,p])=>{
+      const cnt=prodCounts[k];
+      return kpiCard(p.icon,p.label,cnt+' appareils',p.norm,p.color);
+    }).join('')}
+    ${kpiCard('✅','Installés',installed+'/'+equips.length,((installed/equips.length)*100).toFixed(0)+'% du parc',COLOR.ok)}
+  </div>
+
+  <!-- Filtres produits -->
+  <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px">
+    <div style="font-size:9px;color:#64748b;text-transform:uppercase;font-weight:700;margin-bottom:8px">
+      🔍 Filtrer par produit analysé
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      ${filterBtns.map(b=>{
+        const active=filter===b.k;
+        const col=b.color||COLOR.acc;
+        return `<button onclick="window._eqFilter='${b.k}';render()" style="
+          padding:5px 11px;border-radius:5px;cursor:pointer;font-family:inherit;
+          font-size:10px;font-weight:700;letter-spacing:.3px;transition:all .2s;
+          background:${active?(b.color||COLOR.acc):'#ffffff'};
+          color:${active?'#ffffff':(b.color||COLOR.acc)};
+          border:1px solid ${b.color||COLOR.acc};
+        ">${b.label}</button>`;
+      }).join('')}
+      ${canEdit()?`<button onclick="openAddEquipModal()" style="margin-left:8px;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;background:#f59e0b;color:#080d18;border:none">+ Ajouter équipement</button>`:""}' : ''}
+      ${""}
+
+    </div>
+  </div>
+
+  <!-- Filtre fournisseur -->
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+    <span style="font-size:9px;color:#64748b;font-weight:700;text-transform:uppercase">🏭 Fournisseur :</span>
+    <select onchange="window._eqSupplier=this.value;render()" style="border:1.5px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-family:inherit;font-size:10px;background:#fff;color:#1e293b;cursor:pointer">
+      <option value="all">Tous les fournisseurs</option>
+      ${allSuppliers.map(s=>`<option value="${s}" ${supplierFilter===s?'selected':''}>${s}</option>`).join('')}
+    </select>
+    ${supplierFilter!=='all'?`<button onclick="window._eqSupplier='all';render()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:10px;font-weight:700">✕ Effacer</button>`:''}
+    <span style="margin-left:auto;font-size:9px;color:#64748b">${filtered.length}/${equips.length} équipements affichés</span>
+  </div>
+
+  <!-- Légende normes -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+    ${Object.entries(PRODUCTS).map(([k,p])=>`
+      <span style="font-size:9px;color:${p.color}"><strong>${p.icon} ${p.label}</strong> – ${p.norm}</span>
+    `).join('<span style="color:#e2e8f0;margin:0 4px">|</span>')}
+  </div>
+
+  <!-- Tableau -->
+  <div class="card" style="padding:0">
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>N°</th>
+        <th>Désignation</th>
+        <th>Modèle</th>
+        <th>Fournisseur</th>
+        <th>Prix best (FCFA)</th>
+        <th>Produits analysés</th>
+        <th>Statut</th>
+        <th>N° Série</th>
+        <th>Commande</th>
+        <th>Livraison prévue</th>
+        <th>Livraison réelle</th>
+        <th>Installation</th>
+        <th>Calibration</th>
+        <th>✏</th>
+      </tr></thead>
+      <tbody>
+      ${filtered.map(e=>{
+        const late=e.deliveryPlanned&&e.deliveryPlanned<today()&&!e.deliveryActual;
+        const prods=e.products||[];
+        // Highlight row if matches active filter
+        const highlight = filter!=='all'&&filter!=='ordered'&&prods.includes(filter);
+        const hlColor = PRODUCTS[filter]?.color;
+        return `<tr style="${highlight?'border-left:3px solid '+hlColor:''}">
+          <td style="color:${COLOR.muted};font-size:9px;font-weight:700;text-align:center">${e.id}</td>
+          <td style="min-width:160px">
+            <div style="font-weight:700;font-size:11px">${e.name}</div>
+            <div style="color:${COLOR.muted};font-size:8px;line-height:1.3;margin-top:1px">${e.note||''}</div>
+          </td>
+          <td style="color:${COLOR.muted};font-family:monospace;font-size:9px;white-space:nowrap">${e.model}</td>
+          <td style="color:${COLOR.info};font-weight:700;white-space:nowrap">${e.supplier}</td>
+          <td style="color:${COLOR.ok};font-weight:700;white-space:nowrap">${fmt(Math.round(e.p1EUR*EUR_XAF))}</td>
+          <td style="min-width:200px">
+            ${prods.length ? prods.map(k=>productBadge(k)).join('') : '<span style="color:#94a3b8;font-size:9px">Support / Général</span>'}
+          </td>
+          <td style="white-space:nowrap">
+${canEdit()?`<select onchange="updateEqStatus(${e.id},this.value)" style="min-width:130px;background:#f8fafc;color:${(EQ_STATUS[e.status]||EQ_STATUS.pending).fg};border:1.5px solid ${(EQ_STATUS[e.status]||EQ_STATUS.pending).fg};border-radius:5px;padding:4px 7px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;">${selectOptions(EQ_STATUS,e.status)}</select>`:`<span class="badge" style="color:${(EQ_STATUS[e.status]||EQ_STATUS.pending).fg};background:${(EQ_STATUS[e.status]||EQ_STATUS.pending).fg}20">${(EQ_STATUS[e.status]||EQ_STATUS.pending).label}</span>`}
+          </td>
+          <td style="color:${COLOR.muted};font-size:9px">${e.serialNum||'–'}</td>
+          <td style="white-space:nowrap;font-size:9px">${fmtDate(e.orderDate)||'–'}</td>
+          <td style="white-space:nowrap;font-size:9px;color:${late?COLOR.danger:''}">${fmtDate(e.deliveryPlanned)||'–'}${late?' ⚠':''}</td>
+          <td style="white-space:nowrap;font-size:9px;color:${COLOR.ok}">${fmtDate(e.deliveryActual)||'–'}</td>
+          <td style="white-space:nowrap;font-size:9px">${fmtDate(e.installDate)||'–'}</td>
+          <td style="white-space:nowrap;font-size:9px;color:${e.calibDate?COLOR.ok:(e.jet||prods.includes('jet'))?COLOR.warn:COLOR.muted}">
+            ${fmtDate(e.calibDate)||'–'}
+            ${(e.jet||prods.includes('jet'))&&!e.calibDate?'<div style="font-size:8px;color:'+COLOR.warn+'">COFRAC requis</div>':''}
+          </td>
+          <td style="white-space:nowrap">${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="openEquipModal(${e.id})">✏</button> <button class="btn btn-danger btn-sm" onclick="deleteEquip(${e.id})">🗑</button>`:`<span style="color:#94a3b8;font-size:9px">👁</span>`}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid ${COLOR.acc};background:#dbeafe">
+          <td colspan="4" style="padding:7px;font-weight:700;color:${COLOR.acc}">TOTAL – ${filtered.length} équipements affichés</td>
+          <td style="padding:7px;font-weight:700;color:${COLOR.ok}">${fmt(Math.round(filtered.reduce((s,e)=>s+e.p1EUR,0)*EUR_XAF))}</td>
+          <td colspan="9" style="padding:7px;font-size:9px;color:${COLOR.muted}">★ ARSAT gère le dédouanement (Art. 10 contrat) • Livraison prévue 25/01/2027</td>
+        </tr>
+      </tfoot>
+    </table></div>
+  </div>`;
+}
+
+function updateEqStatus(id,val){
+  const e=D.equipments.find(x=>x.id===id);
+  if(e){e.status=val;save('Statut équipement: '+e.name+' → '+val);}updateHeader();
+}
+
+function deleteEquip(id){
+  if(!canEdit()){alert('Accès en lecture seule.');return;}
+  const e=D.equipments.find(x=>x.id===id);
+  if(!e)return;
+  confirmDialog(`Supprimer l'équipement <strong>${e.name}</strong> (${e.model}) ?<br>
+    <span style="color:#64748b;font-size:9px">⚠ Vous pourrez annuler cette action avec le bouton "↩ Annuler".</span>`,()=>{
+    pushUndo('Suppression équipement: '+e.name);
+    D.equipments=D.equipments.filter(x=>x.id!==id);
+    save('Suppression équipement: '+e.name+' ('+e.model+')');render();
+  });
+}
+
+// ─── SHARED: render product checkboxes ──────────────────────────────
+function renderProductCheckboxes(prefix, selectedProds){
+  return Object.entries(PRODUCTS).map(([k,p])=>`
+    <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border:1px solid ${p.color};border-radius:5px;color:${p.color};font-size:10px;font-weight:700;user-select:none;margin:2px">
+      <input type="checkbox" id="${prefix}-prod-${k}" ${selectedProds.includes(k)?'checked':''} style="accent-color:${p.color};width:13px;height:13px">
+      ${p.icon} ${p.label}
+    </label>`).join('');
+}
+
+// ─── LIVE EUR↔FCFA conversion helper ────────────────────────────────
+function setupPriceSync(eurId, fcfaId){
+  const eurEl=document.getElementById(eurId);
+  const fcfaEl=document.getElementById(fcfaId);
+  if(!eurEl||!fcfaEl)return;
+  eurEl.oninput=()=>{
+    const v2=parseFloat(eurEl.value)||0;
+    fcfaEl.value=Math.round(v2*EUR_XAF).toString();
+  };
+  fcfaEl.oninput=()=>{
+    const v2=parseFloat(fcfaEl.value)||0;
+    eurEl.value=(v2/EUR_XAF).toFixed(0);
+  };
+}
+
+// ─── OPEN ADD MODAL ──────────────────────────────────────────────────
+function openAddEquipModal(){
+  document.getElementById('modal-equip-add-body').innerHTML=`
+    <h3>➕ Ajouter un équipement</h3>
+
+    <div style="background:#f8fafc;border-radius:6px;padding:10px;margin-bottom:12px;font-size:9px;color:#64748b">
+      ⚙ Remplissez au minimum : Désignation, Modèle et Fournisseur. Les autres champs peuvent être complétés plus tard.
+    </div>
+
+    <!-- Identification -->
+    <div style="font-size:9px;font-weight:700;color:#d97706;text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:4px">📋 Identification</div>
+    <div class="form-grid">
+      <div class="form-row"><label>Désignation *</label><input type="text" id="na-name" placeholder="Ex: Viscosimètre Anton Paar"></div>
+      <div class="form-row"><label>Modèle *</label><input type="text" id="na-model" placeholder="Ex: SVM 3001"></div>
+      <div class="form-row"><label>Fournisseur *</label><input type="text" id="na-supplier" placeholder="Ex: Anton Paar France"></div>
+      <div class="form-row"><label>N° de référence fournisseur</label><input type="text" id="na-ref" placeholder="Réf. catalogue..."></div>
+    </div>
+
+    <!-- Prix -->
+    <div style="font-size:9px;font-weight:700;color:#16a34a;text-transform:uppercase;margin:10px 0 6px;border-bottom:1px solid #f1f5f9;padding-bottom:4px">💰 Prix (taux fixe : 1 EUR = 655,957 FCFA)</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Prix offre (EUR)</label>
+        <input type="number" id="na-price-eur" placeholder="0" min="0" oninput="setupPriceSync('na-price-eur','na-price-fcfa')">
+      </div>
+      <div class="form-row">
+        <label>= Prix en FCFA (calculé automatiquement)</label>
+        <input type="number" id="na-price-fcfa" placeholder="0" min="0" style="color:#16a34a;font-weight:700">
+      </div>
+      <div class="form-row"><label>Deuxième offre (EUR) – optionnel</label><input type="number" id="na-price2" placeholder="0" min="0"></div>
+      <div class="form-row"><label>Raison de l'ajout</label><input type="text" id="na-reason" placeholder="Ex: Équipement additionnel, remplacement..."></div>
+    </div>
+
+    <!-- Logistique -->
+    <div style="font-size:9px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin:10px 0 6px;border-bottom:1px solid #f1f5f9;padding-bottom:4px">📦 Logistique</div>
+    <div class="form-grid">
+      <div class="form-row"><label>Statut initial</label><select id="na-status">${selectOptions(EQ_STATUS,'pending')}</select></div>
+      <div class="form-row"><label>Date commande</label><input type="date" id="na-order"></div>
+      <div class="form-row"><label>Livraison prévue</label><input type="date" id="na-delivery" value="2027-01-25"></div>
+      <div class="form-row"><label>N° de série</label><input type="text" id="na-serial" placeholder="À compléter à réception"></div>
+    </div>
+
+    <!-- Produits -->
+    <div style="font-size:9px;font-weight:700;color:#9333ea;text-transform:uppercase;margin:10px 0 6px;border-bottom:1px solid #f1f5f9;padding-bottom:4px">⚗ Produits analysés</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+      ${renderProductCheckboxes('na', [])}
+    </div>
+
+    <!-- Note -->
+    <div class="form-row"><label>Note / Norme ASTM applicable</label><textarea id="na-note" placeholder="Ex: ASTM D445 – viscosité cinématique à 40°C et 100°C" style="min-height:50px"></textarea></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-equip-add')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveNewEquip()">➕ Ajouter l'équipement</button>
+    </div>`;
+  openModal('modal-equip-add');
+  // setup live price sync after modal renders
+  setTimeout(()=>setupPriceSync('na-price-eur','na-price-fcfa'),50);
+}
+
+function saveNewEquip(){if(!canEdit()){alert('Accès en lecture seule.');return;}
+  const name=v('na-name').trim();
+  const model=v('na-model').trim();
+  const supplier=v('na-supplier').trim();
+  if(!name){alert('La désignation est obligatoire.');document.getElementById('na-name').focus();return;}
+  if(!model){alert('Le modèle est obligatoire.');document.getElementById('na-model').focus();return;}
+  if(!supplier){alert('Le fournisseur est obligatoire.');document.getElementById('na-supplier').focus();return;}
+  const priceEUR=+v('na-price-eur')||0;
+  const price2EUR=+v('na-price2')||0;
+  const prods=Object.keys(PRODUCTS).filter(k=>document.getElementById('na-prod-'+k)?.checked);
+  const existingIds=D.equipments.map(e=>typeof e.id==='number'&&e.id<10000?e.id:0);
+  const newId=(existingIds.length?Math.max(...existingIds):36)+1;
+  D.equipments.push({
+    id:newId, name, model, supplier,
+    ref: v('na-ref')||'',
+    p1EUR: priceEUR,
+    p2EUR: price2EUR,
+    products: prods,
+    jet: prods.includes('jet'),
+    status: v('na-status')||'pending',
+    orderDate: v('na-order')||'',
+    deliveryPlanned: v('na-delivery')||'2027-01-25',
+    deliveryActual:'', installDate:'', serialNum:v('na-serial')||'',
+    calibDate:'', note:v('na-note')||'',
+    priceHistory:[],
+    addedDate: today(),
+    addReason: v('na-reason')||'Ajout manuel',
+  });
+  save('Ajout équipement: '+name+' ('+model+') – '+supplier);
+  closeModal('modal-equip-add');render();
+}
+
+// ─── OPEN EDIT MODAL ─────────────────────────────────────────────────
+function openEquipModal(id){
+  const e=D.equipments.find(x=>x.id===id);
+  if(!e)return;
+  const prods=e.products||[];
+  const isJet=prods.includes('jet')||e.jet;
+  const ph=e.priceHistory||[];
+
+  // price history table
+  const phRows=ph.length ? ph.slice().reverse().map(h=>`
+    <tr>
+      <td style="color:#64748b">${h.date}</td>
+      <td style="color:#d97706">${h.oldEUR} €</td>
+      <td style="color:#16a34a">${h.newEUR} €</td>
+      <td style="color:#1d4ed8">${h.delta>0?'+':''} ${h.delta} €</td>
+      <td style="color:#475569;font-size:9px">${h.reason||'–'}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="5" style="color:#64748b;text-align:center;padding:8px">Aucune modification de prix enregistrée</td></tr>`;
+
+  document.getElementById('modal-equip-body').innerHTML=`
+    <h3>✏ Modifier – ${e.name}</h3>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+      ${badge(e.supplier||'–', '#0ea5e9')}
+      ${badge(fmt(Math.round((e.p1EUR||0)*EUR_XAF))+' FCFA', '#10b981')}
+      ${prods.map(k=>productBadge(k)).join('')}
+      ${isJet?'<span class="badge" style="background:#fff5f5;color:#dc2626">⚠ Calibration COFRAC requise</span>':''}
+    </div>
+
+    <!-- TABS inside modal -->
+    <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:12px">
+      ${['🏷 Identité','💰 Prix','📦 Logistique','⚗ Produits','📝 Note'].map((t,i)=>`
+        <button onclick="switchEqTab(${i})" id="eq-tab-btn-${i}" style="padding:6px 12px;background:none;border:none;border-bottom:${i===0?'2px solid #f59e0b':'2px solid transparent'};color:${i===0?'#f59e0b':'#64748b'};cursor:pointer;font-family:inherit;font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:-2px">${t}</button>`).join('')}
+    </div>
+
+    <!-- TAB 0: Identité -->
+    <div id="eq-tab-0">
+      <div class="form-grid">
+        <div class="form-row"><label>Désignation</label><input type="text" id="eq-name" value="${e.name}"></div>
+        <div class="form-row"><label>Modèle</label><input type="text" id="eq-model" value="${e.model}"></div>
+        <div class="form-row"><label>Fournisseur</label><input type="text" id="eq-supplier" value="${e.supplier||''}"></div>
+        <div class="form-row"><label>Référence fournisseur</label><input type="text" id="eq-ref" value="${e.ref||''}"></div>
+        <div class="form-row"><label>Statut</label><select id="eq-status">${selectOptions(EQ_STATUS,e.status)}</select></div>
+        <div class="form-row"><label>N° de série</label><input type="text" id="eq-serial" value="${e.serialNum||''}"></div>
+      </div>
+    </div>
+
+    <!-- TAB 1: Prix -->
+    <div id="eq-tab-1" style="display:none">
+      <div style="background:#f8fafc;border-radius:6px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#64748b;text-transform:uppercase">Prix actuel (EUR)</div>
+          <div style="font-size:22px;font-weight:700;color:#16a34a">${e.p1EUR||0} €</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#64748b;text-transform:uppercase">Prix actuel (FCFA)</div>
+          <div style="font-size:22px;font-weight:700;color:#d97706">${fmt(Math.round((e.p1EUR||0)*EUR_XAF))} FCFA</div>
+        </div>
+      </div>
+
+      <div style="font-size:9px;font-weight:700;color:#16a34a;text-transform:uppercase;margin-bottom:6px">Modifier le prix</div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Nouveau prix – Offre 1 (EUR)</label>
+          <input type="number" id="eq-price-eur" value="${e.p1EUR||0}" min="0" oninput="document.getElementById('eq-price-fcfa').value=Math.round(this.value*${EUR_XAF})">
+        </div>
+        <div class="form-row">
+          <label>= FCFA (calculé automatiquement)</label>
+          <input type="number" id="eq-price-fcfa" value="${Math.round((e.p1EUR||0)*EUR_XAF)}" style="color:#d97706;font-weight:700" oninput="document.getElementById('eq-price-eur').value=Math.round(this.value/${EUR_XAF})">
+        </div>
+        <div class="form-row">
+          <label>Offre 2 (EUR) – comparatif</label>
+          <input type="number" id="eq-price2-eur" value="${e.p2EUR||0}" min="0">
+        </div>
+        <div class="form-row">
+          <label>Raison de la modification *</label>
+          <input type="text" id="eq-price-reason" placeholder="Ex: Avenant fournisseur, hausse matières, devis actualisé..." style="border-color:#d97706">
+        </div>
+      </div>
+
+      <div style="font-size:9px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin:10px 0 6px">Historique des modifications de prix</div>
+      <div style="overflow-x:auto;max-height:140px;overflow-y:auto">
+        <table style="font-size:9px">
+          <thead><tr>
+            <th>Date</th><th>Ancien prix</th><th>Nouveau prix</th><th>Variation</th><th>Raison</th>
+          </tr></thead>
+          <tbody>${phRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Logistique -->
+    <div id="eq-tab-2" style="display:none">
+      <div class="form-grid">
+        <div class="form-row"><label>Date commande</label><input type="date" id="eq-order" value="${e.orderDate||''}"></div>
+        <div class="form-row"><label>Livraison prévue</label><input type="date" id="eq-dplan" value="${e.deliveryPlanned||''}"></div>
+        <div class="form-row"><label>Livraison réelle</label><input type="date" id="eq-dact" value="${e.deliveryActual||''}"></div>
+        <div class="form-row"><label>Date installation</label><input type="date" id="eq-inst" value="${e.installDate||''}"></div>
+        <div class="form-row"><label>Date calibration COFRAC</label>
+          <input type="date" id="eq-calib" value="${e.calibDate||''}" style="${isJet?'border-color:#d97706':''}">
+          ${isJet?'<div style="font-size:8px;color:#d97706;margin-top:2px">⚠ Obligatoire pour certification Jet A1</div>':''}
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Produits -->
+    <div id="eq-tab-3" style="display:none">
+      <div style="font-size:10px;color:#475569;margin-bottom:10px">Cochez tous les produits que cet appareil peut analyser.</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${renderProductCheckboxes('eq', prods)}
+      </div>
+    </div>
+
+    <!-- TAB 4: Note -->
+    <div id="eq-tab-4" style="display:none">
+      <div class="form-row"><label>Note / Norme ASTM / Observations</label><textarea id="eq-note" style="min-height:100px">${e.note||''}</textarea></div>
+      ${e.addedDate?`<div style="font-size:9px;color:#64748b;margin-top:6px">Ajouté le ${e.addedDate}${e.addReason?' – '+e.addReason:''}</div>`:''}
+    </div>
+
+    <div class="modal-footer" style="margin-top:14px">
+      <button class="btn btn-danger btn-sm" onclick="closeModal('modal-equip');deleteEquip(${id})">🗑 Supprimer</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-equip')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEquip(${id})">💾 Enregistrer les modifications</button>
+    </div>`;
+  openModal('modal-equip');
+}
+
+function switchEqTab(idx){
+  for(let i=0;i<5;i++){
+    const tab=document.getElementById('eq-tab-'+i);
+    const btn=document.getElementById('eq-tab-btn-'+i);
+    if(tab) tab.style.display=i===idx?'block':'none';
+    if(btn){btn.style.color=i===idx?'#1e40af':'#64748b';btn.style.borderBottomColor=i===idx?'#f59e0b':'transparent';}
+  }
+}
+
+function saveEquip(id){if(!canEdit()){alert('Accès en lecture seule.');closeModal('modal-equip');return;}
+  const e=D.equipments.find(x=>x.id===id);
+  if(!e){closeModal('modal-equip');return;}
+
+  // Price change tracking
+  const newEUR=+v('eq-price-eur')||e.p1EUR;
+  if(newEUR!==e.p1EUR){
+    const reason=v('eq-price-reason').trim();
+    if(!reason){
+      alert('⚠ Veuillez indiquer la raison de la modification de prix (onglet "💰 Prix").');
+      switchEqTab(1);
+      document.getElementById('eq-price-reason').focus();
+      return;
+    }
+    if(!e.priceHistory) e.priceHistory=[];
+    e.priceHistory.push({
+      date:today(),
+      oldEUR:e.p1EUR,
+      newEUR:newEUR,
+      delta:newEUR-e.p1EUR,
+      reason:reason,
+    });
+    e.p1EUR=newEUR;
+  }
+
+  // Identity
+  if(document.getElementById('eq-name')) e.name=v('eq-name')||e.name;
+  if(document.getElementById('eq-model')) e.model=v('eq-model')||e.model;
+  e.supplier=v('eq-supplier')||e.supplier;
+  e.ref=v('eq-ref')||e.ref||'';
+  e.status=v('eq-status')||e.status;
+  e.serialNum=v('eq-serial')||'';
+  e.p2EUR=+v('eq-price2-eur')||e.p2EUR||0;
+
+  // Logistics
+  e.orderDate=v('eq-order')||'';
+  e.deliveryPlanned=v('eq-dplan')||'';
+  e.deliveryActual=v('eq-dact')||'';
+  e.installDate=v('eq-inst')||'';
+  e.calibDate=v('eq-calib')||'';
+
+  // Products
+  const newProds=Object.keys(PRODUCTS).filter(k=>document.getElementById('eq-prod-'+k)?.checked);
+  if(newProds.length>0) e.products=newProds;
+  e.jet=e.products.includes('jet');
+
+  // Note
+  e.note=v('eq-note')||'';
+
+  save('Mise à jour équipement: '+e.name);
+  closeModal('modal-equip');render();
+}
+
+// ═══ RISQUES ═════════════════════════════════════════════════════════
+function renderRisques(){
+  const risks=D.risks||[];
+  const sorted=[...risks].sort((a,b)=>b.prob*b.impact-a.prob*a.impact);
+  const open=risks.filter(r=>r.status==='open').length;
+  const crit=risks.filter(r=>r.prob*r.impact>=15&&r.status==='open').length;
+
+  return `
+  <div class="g3" style="margin-bottom:12px">
+    ${kpiCard('🔴','Risques critiques (≥15)',crit,'Score Prob × Impact',COLOR.danger)}
+    ${kpiCard('🟠','Risques ouverts',open,`sur ${risks.length} total`,COLOR.warn)}
+    ${kpiCard('🟢','Risques clôturés',risks.filter(r=>r.status==='closed').length,'','#10b981')}
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn btn-primary btn-sm" onclick="openRiskModal()">+ Ajouter un risque</button>
+    <span style="color:${COLOR.muted};font-size:10px;margin-left:auto">Score = Probabilité (1-5) × Impact (1-5)</span>
+  </div>
+  ${sorted.map(r=>{
+    const sc=r.prob*r.impact;const col=riskColor(r.prob,r.impact);
+    const late=r.nextReview&&r.nextReview<today()&&r.status!=='closed';
+    return `
+    <div class="card" style="border-left:3px solid ${col}">
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap">
+        <div style="flex:1">
+          <span class="badge" style="margin-right:6px;color:${COLOR.muted};background:#e2e8f0">${r.cat}</span>
+          <span style="font-weight:700;font-size:12px">${r.title}</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <div style="background:${col}22;border:1px solid ${col};border-radius:5px;padding:4px 10px;text-align:center">
+            <div style="font-size:8px;color:${COLOR.muted}">SCORE</div>
+            <div style="font-size:18px;font-weight:700;color:${col}">${sc}</div>
+            <div style="font-size:8px;color:${COLOR.muted}">${r.prob}×${r.impact}</div>
+          </div>
+          ${riskBadge(r.status)}
+          <button class="btn btn-ghost btn-sm" onclick="openRiskModal(${r.id})">✏</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRisk(${r.id})">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:10px;margin-bottom:4px"><span style="color:${COLOR.muted}">Mitigation : </span><span style="color:${COLOR.ok}">${r.mitigation}</span></div>
+      <div style="display:flex;gap:16px;font-size:9px;color:${COLOR.muted}">
+        <span>Responsable : <strong style="color:white">${r.responsible}</strong></span>
+        <span style="color:${late?COLOR.danger:''}">Révision : <strong style="color:${late?COLOR.danger:COLOR.acc}">${fmtDate(r.nextReview)||'–'}${late?' ⚠ EN RETARD':''}</strong></span>
+        <span>MAJ : ${fmtDate(r.lastUpdate)}</span>
+      </div>
+      ${r.comments&&r.comments.length?`<div style="margin-top:6px;padding:5px 8px;background:#f8fafc;border-radius:4px;font-size:9px;color:${COLOR.muted}">
+        ${r.comments.slice(-1)[0]?.text||''}
+      </div>`:''}
+    </div>`;
+  }).join('')}`;
+}
+
+function openRiskModal(id){
+  const r=id?D.risks.find(x=>x.id===id):{id:Date.now(),cat:'',prob:3,impact:3,title:'',mitigation:'',responsible:'Chef de projet',status:'open',nextReview:'',lastUpdate:today(),comments:[]};
+  const cats=['Technique','Logistique','Financier','Sécurité / HSE','ATEX','Alimentation électrique','Climatique','Géotechnique','Certification','Contrat / Pénalité','Autre'];
+  document.getElementById('modal-risk-body').innerHTML=`
+    <h3>${id?'Modifier le risque':'Nouveau risque'}</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Catégorie</label><select id="r-cat">${cats.map(c=>`<option value="${c}"${c===r.cat?' selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="form-row"><label>Statut</label><select id="r-status">${selectOptions(RISK_STATUS,r.status)}</select></div>
+    </div>
+    <div class="form-row"><label>Titre / Description du risque</label><input type="text" id="r-title" value="${r.title}"></div>
+    <div class="form-grid">
+      <div class="form-row"><label>Probabilité (1-5)</label><input type="number" id="r-prob" value="${r.prob}" min="1" max="5"></div>
+      <div class="form-row"><label>Impact (1-5)</label><input type="number" id="r-impact" value="${r.impact}" min="1" max="5"></div>
+      <div class="form-row"><label>Responsable</label><input type="text" id="r-resp" value="${r.responsible}"></div>
+      <div class="form-row"><label>Prochaine révision</label><input type="date" id="r-review" value="${r.nextReview||''}"></div>
+    </div>
+    <div class="form-row"><label>Mesure de mitigation</label><textarea id="r-mitig">${r.mitigation}</textarea></div>
+    <div class="form-row"><label>Commentaire / Mise à jour</label><textarea id="r-comment" placeholder="Ajouter une mise à jour..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-risk')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRisk(${r.id},${!!id})">Enregistrer</button>
+    </div>`;
+  openModal('modal-risk');
+}
+function saveRisk(id,isEdit){
+  const comment=v('r-comment');
+  const existing=isEdit?D.risks.find(x=>x.id===id):null;
+  const comments=existing?existing.comments||[]:[];
+  if(comment.trim())comments.push({date:today(),text:comment.trim()});
+  const r={id,cat:v('r-cat'),prob:+v('r-prob'),impact:+v('r-impact'),title:v('r-title'),mitigation:v('r-mitig'),responsible:v('r-resp'),status:v('r-status'),nextReview:v('r-review'),lastUpdate:today(),comments};
+  if(isEdit){const i=D.risks.findIndex(x=>x.id===id);D.risks[i]=r;}else D.risks.push(r);
+  save();closeModal('modal-risk');render();
+}
+function deleteRisk(id){
+  confirmDialog('Supprimer ce risque ?',()=>{pushUndo('Suppression risque: '+r.title);D.risks=D.risks.filter(r=>r.id!==id);save();render();});
+}
+
+// ═══ DOCUMENTS ═══════════════════════════════════════════════════════
+function renderDocs(){
+  const docs=D.documents||[];
+  const types=[...new Set(docs.map(d=>d.type))];
+  const approved=docs.filter(d=>d.status==='approved').length;
+  const todo=docs.filter(d=>d.status==='todo').length;
+
+  return `
+  <div class="g4" style="margin-bottom:12px">
+    ${kpiCard('✅','Approuvés',approved,`${((approved/docs.length)*100).toFixed(0)}% du total`,COLOR.ok)}
+    ${kpiCard('📝','À produire',todo,'Documents manquants',todo>5?COLOR.danger:COLOR.warn)}
+    ${kpiCard('📤','Soumis',docs.filter(d=>d.status==='submitted').length,'En attente validation',COLOR.info)}
+    ${kpiCard('❌','Rejetés',docs.filter(d=>d.status==='rejected').length,'À corriger',COLOR.danger)}
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn btn-primary btn-sm" onclick="openDocModal()">+ Ajouter un document</button>
+  </div>
+  ${types.map(type=>{
+    const typeDocs=docs.filter(d=>d.type===type);
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="color:${COLOR.acc}">${type} (${typeDocs.filter(d=>d.status==='approved').length}/${typeDocs.length})</div>
+      <table>
+        <thead><tr><th>Document</th><th>Statut</th><th>Version</th><th>Date</th><th>Note</th><th>Action</th></tr></thead>
+        <tbody>
+        ${typeDocs.map(d=>`<tr style="${d.required&&d.status==='todo'?'background:rgba(239,68,68,0.05)':''}">
+          <td style="font-weight:600">${d.name}${d.required?'<span style="color:#dc2626;font-size:9px"> *</span>':''}</td>
+          <td>
+            <select onchange="updateDocStatus(${d.id},this.value)" style="background:#f8fafc;color:${(DOC_STATUS[d.status]||DOC_STATUS.todo).fg};border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-family:inherit;font-size:9px">
+              ${selectOptions(DOC_STATUS,d.status)}
+            </select>
+          </td>
+          <td style="color:${COLOR.muted}">${d.version||'–'}</td>
+          <td style="color:${COLOR.muted};white-space:nowrap">${fmtDate(d.date)||'–'}</td>
+          <td style="color:${COLOR.muted};font-size:9px;max-width:150px">${d.note||''}</td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-ghost btn-sm" onclick="openDocModal(${d.id})">✏</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})">🗑</button>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('')}`;
+}
+
+function updateDocStatus(id,v){
+  const d=D.documents.find(x=>x.id===id);
+  if(d){d.status=v;if(v==='approved')d.date=d.date||today();save();}
+}
+function openDocModal(id){
+  const d=id?D.documents.find(x=>x.id===id):{id:Date.now(),name:'',type:'Autre',required:false,status:'todo',date:'',version:'',note:''};
+  const types=['Étude','Plans','Validation','Administratif','HSE','Équipements','Certification','Réception','Formation','Clôture','Autre'];
+  document.getElementById('modal-doc-body').innerHTML=`
+    <h3>${id?'Modifier le document':'Nouveau document'}</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Nom du document</label><input type="text" id="d-name" value="${d.name}"></div>
+      <div class="form-row"><label>Type</label><select id="d-type">${types.map(t=>`<option${t===d.type?' selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="form-row"><label>Statut</label><select id="d-status">${selectOptions(DOC_STATUS,d.status)}</select></div>
+      <div class="form-row"><label>Version</label><input type="text" id="d-version" value="${d.version||''}" placeholder="Ex: 00, 01-A..."></div>
+      <div class="form-row"><label>Date</label><input type="date" id="d-date" value="${d.date||''}"></div>
+      <div class="form-row"><label>Requis</label><select id="d-req"><option value="true"${d.required?' selected':''}>Oui</option><option value="false"${!d.required?' selected':''}>Non</option></select></div>
+    </div>
+    <div class="form-row"><label>Note</label><textarea id="d-note">${d.note||''}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-doc')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveDoc(${d.id},${!!id})">Enregistrer</button>
+    </div>`;
+  openModal('modal-doc');
+}
+function saveDoc(id,isEdit){
+  const d={id,name:v('d-name'),type:v('d-type'),status:v('d-status'),version:v('d-version'),date:v('d-date'),required:v('d-req')==='true',note:v('d-note')};
+  if(isEdit){const i=D.documents.findIndex(x=>x.id===id);D.documents[i]=d;}else D.documents.push(d);
+  save();closeModal('modal-doc');render();
+}
+function deleteDoc(id){
+  confirmDialog('Supprimer ce document ?',()=>{pushUndo('Suppression document: '+d.name);D.documents=D.documents.filter(d=>d.id!==id);save();render();});
+}
+
+// ═══ JOURNAL DE CHANTIER ═════════════════════════════════════════════
+function renderJournal(){
+  const entries=[...(D.journal||[])].reverse();
+  const types={decision:{icon:'⚡',color:COLOR.acc,label:'Décision'},reunion:{icon:'👥',color:COLOR.info,label:'Réunion chantier'},visite:{icon:'🔍',color:COLOR.purple,label:'Visite de site'},incident:{icon:'🚨',color:COLOR.danger,label:'Incident / Alerte'},livraison:{icon:'📦',color:COLOR.ok,label:'Livraison'},reception:{icon:'✅',color:COLOR.ok,label:'Réception'},autre:{icon:'📝',color:COLOR.muted,label:'Autre'}};
+
+  return `
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary btn-sm" onclick="openJournalModal()">+ Nouvelle entrée</button>
+    <span style="color:${COLOR.muted};font-size:10px;margin-left:auto">${(D.journal||[]).length} entrées enregistrées</span>
+  </div>
+  ${entries.length===0?`<div class="card" style="text-align:center;color:${COLOR.muted};padding:40px">Aucune entrée de journal. Commencez à documenter votre projet.</div>`:
+  entries.map(e=>{
+    const t=types[e.type]||types.autre;
+    return `
+    <div class="card" style="border-left:3px solid ${t.color};padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">${t.icon}</span>
+          <span class="badge" style="color:${t.color}">${t.label}</span>
+          <span style="font-weight:700;font-size:12px">${e.title||'(sans titre)'}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="color:${COLOR.acc};font-weight:700;font-size:10px">${fmtDate(e.date)}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteJournal(${e.id})">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:10px;color:white;margin-bottom:6px;line-height:1.5">${e.description||''}</div>
+      ${e.participants?`<div style="font-size:9px;color:${COLOR.muted}">👥 Participants : ${e.participants}</div>`:''}
+      ${e.decisions?`<div style="font-size:9px;color:${COLOR.ok};margin-top:4px">✅ Décisions : ${e.decisions}</div>`:''}
+      ${e.note?`<div style="font-size:9px;color:${COLOR.muted};margin-top:4px;padding:4px 6px;background:#f8fafc;border-radius:3px">${e.note}</div>`:''}
+    </div>`;
+  }).join('')}`;
+}
+
+function openJournalModal(){
+  const types=['reunion','visite','decision','incident','livraison','reception','autre'];
+  const tLabels={reunion:'Réunion chantier',visite:'Visite de site',decision:'Décision',incident:'Incident / Alerte',livraison:'Livraison',reception:'Réception',autre:'Autre'};
+  document.getElementById('modal-journal-body').innerHTML=`
+    <h3>Nouvelle entrée de journal</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Date</label><input type="date" id="j-date" value="${today()}"></div>
+      <div class="form-row"><label>Type</label><select id="j-type">${types.map(t=>`<option value="${t}">${tLabels[t]}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row"><label>Titre</label><input type="text" id="j-title" placeholder="Titre de l'entrée..."></div>
+    <div class="form-row"><label>Description / Compte-rendu</label><textarea id="j-desc" style="min-height:80px" placeholder="Décrivez les faits, les travaux réalisés, les observations..."></textarea></div>
+    <div class="form-row"><label>Participants</label><input type="text" id="j-part" placeholder="Noms des participants..."></div>
+    <div class="form-row"><label>Décisions prises</label><textarea id="j-deci" placeholder="Actions décidées, responsables, échéances..."></textarea></div>
+    <div class="form-row"><label>Note complémentaire</label><input type="text" id="j-note" placeholder="Information complémentaire..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-journal')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveJournal()">Enregistrer</button>
+    </div>`;
+  openModal('modal-journal');
+}
+function saveJournal(){
+  const entry={id:Date.now(),date:v('j-date'),type:v('j-type'),title:v('j-title'),description:v('j-desc'),participants:v('j-part'),decisions:v('j-deci'),note:v('j-note')};
+  if(!D.journal)D.journal=[];
+  D.journal.push(entry);
+  save();closeModal('modal-journal');render();
+}
+function deleteJournal(id){
+  confirmDialog('Supprimer cette entrée ?',()=>{pushUndo('Suppression journal: '+e.title);D.journal=D.journal.filter(j=>j.id!==id);save();render();});
+}
+
+// ─── UTILITIES ────────────────────────────────────────────────────────
+function v(id){const el=document.getElementById(id);return el?el.value:'';}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+let _confirmCb=null;
+function confirmDialog(msg,cb){
+  _confirmCb=cb;
+  document.getElementById('modal-confirm-body').innerHTML=`
+    <h3>Confirmation</h3>
+    <div style="margin-bottom:16px;font-size:12px;line-height:1.6">${msg}</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm');_confirmCb=null">Annuler</button>
+      <button class="btn btn-danger" onclick="closeModal('modal-confirm');if(_confirmCb){_confirmCb();_confirmCb=null;}">✓ Confirmer</button>
+    </div>`;
+  openModal('modal-confirm');
+}
+function bindEvents(){
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(o=>{
+    o.onclick=e=>{if(e.target===o)o.classList.remove('open');};
+  });
+}
+
+// ─── SAVE NOTIFICATION ───────────────────────────────────────────────
+function showSaveNotif(){
+  let n=document.getElementById('save-notif');
+  if(!n){n=document.createElement('div');n.id='save-notif';
+    n.style.cssText='position:fixed;bottom:18px;right:18px;background:#f0fdf4;border:1px solid #10b981;border-radius:6px;padding:8px 14px;font-size:10px;color:#16a34a;font-family:inherit;z-index:9999;display:flex;gap:8px;align-items:center;opacity:0;transition:opacity .3s';
+    n.innerHTML='✓ Sauvegardé automatiquement';
+    document.body.appendChild(n);}
+  n.style.opacity='1';
+  clearTimeout(window._saveT);
+  window._saveT=setTimeout(()=>n.style.opacity='0',2200);
+}
+
+// ─── EXPORT MODAL ────────────────────────────────────────────────────
+let _folderHandle = null; // persists in memory during session
+
+function openExportModal(){
+  const hist = D.meta.history||[];
+  const folderName = D.meta.savedFolder || 'Non défini';
+  const now = new Date().toLocaleString('fr-FR');
+  const avgProg=(D.tasks||[]).length?Math.round((D.tasks||[]).reduce((s,t)=>s+t.progress,0)/(D.tasks||[]).length):0;
+  const filename = `ARSAT_Labo_${today()}_v${(D.meta.saveCount||0)+1}.json`;
+
+  const isFSASupported = typeof window.showDirectoryPicker === 'function';
+
+  const histRows = hist.length ? hist.map((h,i)=>`
+    <tr style="${i===0?'background:rgba(245,158,11,0.08)':''}">
+      <td style="color:${i===0?COLOR.acc:COLOR.muted};font-weight:${i===0?700:400}">${i===0?'▶ ':''} #${h.id}</td>
+      <td style="color:${i===0?COLOR.acc:'#e2e8f0'}">${h.datetime}</td>
+      <td style="color:#475569">${h.description}</td>
+      <td style="color:${COLOR.ok}">${h.avancement}</td>
+      <td style="color:${COLOR.warn}">${h.risquesOuverts} ouvert(s)</td>
+      <td style="color:#9333ea">${h.tachesTerminees}</td>
+    </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:#64748b;padding:14px">Aucun historique. Faites un premier export.</td></tr>`;
+
+  document.getElementById('modal-export-body').innerHTML=`
+    <h3>💾 Exporter les données du projet</h3>
+
+    <!-- Snapshot instantané -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div style="background:#f8fafc;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:#64748b;text-transform:uppercase">Avancement global</div>
+        <div style="font-size:20px;font-weight:700;color:#16a34a">${avgProg}%</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:#64748b;text-transform:uppercase">Sauvegardes totales</div>
+        <div style="font-size:20px;font-weight:700;color:#d97706">${D.meta.saveCount||0}</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:9px;color:#64748b;text-transform:uppercase">Dernière MAJ</div>
+        <div style="font-size:12px;font-weight:700;color:#1d4ed8">${fmtDate(D.meta.lastUpdated)}</div>
+      </div>
+    </div>
+
+    <!-- Nom du fichier -->
+    <div class="form-row">
+      <label>Nom du fichier (modifiable)</label>
+      <input type="text" id="ex-filename" value="${filename}" style="font-family:monospace">
+    </div>
+
+    <!-- Note de modification -->
+    <div class="form-row">
+      <label>Description de cette sauvegarde (pour l'historique)</label>
+      <input type="text" id="ex-desc" placeholder="Ex: Mise à jour avancement fondations, lot CFO attribué..." style="border-color:#d97706">
+    </div>
+
+    <!-- Choix du dossier -->
+    <div style="background:#f8fafc;border-radius:6px;padding:12px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#d97706;margin-bottom:6px">📁 Dossier de destination</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;background:#ffffff;border:1px solid #e2e8f0;border-radius:4px;padding:6px 10px;font-size:10px;color:${_folderHandle?'#10b981':'#64748b'}" id="ex-folder-display">
+          ${_folderHandle ? '📂 ' + _folderHandle.name : folderName !== 'Non défini' ? '📂 ' + folderName : '⚠ Aucun dossier sélectionné – export dans Téléchargements'}
+        </div>
+        ${isFSASupported
+          ? `<button class="btn btn-ghost btn-sm" onclick="pickFolder()" id="btn-pick-folder">📁 Choisir dossier</button>`
+          : `<span style="font-size:9px;color:#64748b">Choix de dossier disponible sur Chrome/Edge uniquement</span>`
+        }
+      </div>
+      ${isFSASupported
+        ? `<div style="font-size:9px;color:#64748b;margin-top:5px">💡 Sur Chrome/Edge : cliquez "Choisir dossier" pour sélectionner votre dossier projet. Le fichier y sera enregistré directement.</div>`
+        : `<div style="font-size:9px;color:#64748b;margin-top:5px">💡 Votre navigateur ne supporte pas la sélection de dossier. Le fichier sera téléchargé dans votre dossier "Téléchargements".</div>`
+      }
+    </div>
+
+    <!-- Historique des 5 dernières modifications -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#d97706;margin-bottom:8px">🕐 Historique des 5 dernières sauvegardes</div>
+      <div style="overflow-x:auto">
+        <table style="font-size:9px">
+          <thead><tr>
+            <th>#</th><th>Date & Heure</th><th>Description</th><th>Avancement</th><th>Risques</th><th>Tâches</th>
+          </tr></thead>
+          <tbody>${histRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-export')">Annuler</button>
+      <button class="btn btn-primary" onclick="doExport()">💾 Exporter maintenant</button>
+    </div>`;
+  openModal('modal-export');
+}
+
+async function pickFolder(){
+  try{
+    _folderHandle = await window.showDirectoryPicker({mode:'readwrite'});
+    D.meta.savedFolder = _folderHandle.name;
+    document.getElementById('ex-folder-display').innerHTML = '📂 ' + _folderHandle.name;
+    document.getElementById('ex-folder-display').style.color='#10b981';
+    document.getElementById('btn-pick-folder').textContent='✓ Dossier sélectionné';
+  }catch(e){
+    if(e.name!=='AbortError') alert('Impossible de sélectionner le dossier : '+e.message);
+  }
+}
+
+async function doExport(){
+  const filename = (document.getElementById('ex-filename').value||`ARSAT_Labo_${today()}.json`).replace(/[^a-z0-9_\-\.]/gi,'_');
+  const desc = document.getElementById('ex-desc').value || 'Export manuel';
+
+  // Record this export in history BEFORE serializing
+  if(!D.meta.history) D.meta.history=[];
+  if(!D.meta.saveCount) D.meta.saveCount=0;
+  D.meta.saveCount++;
+  D.meta.lastUpdated=today();
+  const tasks=D.tasks||[];
+  const avgProg=tasks.length?Math.round(tasks.reduce((s,t)=>s+t.progress,0)/tasks.length):0;
+  const histEntry={
+    id:D.meta.saveCount,
+    datetime:new Date().toLocaleString('fr-FR'),
+    date:today(),
+    description:desc,
+    avancement:avgProg+'%',
+    risquesOuverts:(D.risks||[]).filter(r=>r.status==='open').length,
+    paye:fmt((D.payments||[]).filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0))+' FCFA',
+    tachesTerminees:tasks.filter(t=>t.progress===100).length+'/'+tasks.length,
+    filename:filename,
+  };
+  D.meta.history.unshift(histEntry);
+  D.meta.history=D.meta.history.slice(0,5);
+  localStorage.setItem('arsat_v3',JSON.stringify(D));
+
+  const json = JSON.stringify(D, null, 2);
+  const blob = new Blob([json],{type:'application/json'});
+
+  // Try File System Access API first (folder picker was used)
+  if(_folderHandle){
+    try{
+      const fh = await _folderHandle.getFileHandle(filename,{create:true});
+      const writable = await fh.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      closeModal('modal-export');
+      showExportSuccess(`✅ Fichier enregistré dans : ${_folderHandle.name}/${filename}`);
+      updateHeader();
+      return;
+    }catch(e){
+      console.warn('File System API failed, falling back to download:',e);
+    }
+  }
+
+  // Fallback: regular download
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+  closeModal('modal-export');
+  showExportSuccess(`✅ Fichier téléchargé : ${filename}`);
+  updateHeader();
+}
+
+function showExportSuccess(msg){
+  let n=document.getElementById('export-notif');
+  if(!n){n=document.createElement('div');n.id='export-notif';
+    n.style.cssText='position:fixed;bottom:50px;right:18px;background:#dbeafe;border:1px solid #0ea5e9;border-radius:6px;padding:10px 16px;font-size:11px;color:#1d4ed8;font-family:inherit;z-index:9999;max-width:380px;opacity:0;transition:opacity .3s';
+    document.body.appendChild(n);}
+  n.textContent=msg;
+  n.style.opacity='1';
+  clearTimeout(window._exportT);
+  window._exportT=setTimeout(()=>n.style.opacity='0',4000);
+}
+
+// ─── IMPORT ──────────────────────────────────────────────────────────
+function importData(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const raw=e.target.result;
+      const data=JSON.parse(raw);
+      // Validate it's an ARSAT file
+      if(!data.meta||!data.tasks){
+        alert('❌ Fichier invalide – ce fichier ne semble pas être un export ARSAT.');
+        event.target.value='';return;
+      }
+      const equCount=(data.equipments||[]).length;
+      const taskCount=(data.tasks||[]).length;
+      const lastUpdate=data.meta.lastUpdated||'–';
+      confirmDialog(
+        `<strong>Importer "${file.name}" ?</strong><br><br>
+        <div style="background:#f8fafc;border-radius:6px;padding:8px 10px;margin:8px 0;font-size:10px;line-height:1.7">
+          📅 Dernière MAJ : <strong>${lastUpdate}</strong><br>
+          📋 Tâches : <strong>${taskCount}</strong><br>
+          ⚗ Équipements : <strong>${equCount}</strong><br>
+          💾 Sauvegardes : <strong>${data.meta.saveCount||0}</strong>
+        </div>
+        <span style="font-size:9px;color:#dc2626">⚠ Cela remplacera intégralement votre suivi actuel.</span>`,
+        ()=>{
+          D=data;
+          // Init all missing fields
+          if(!D.meta.history) D.meta.history=[];
+          if(!D.meta.saveCount) D.meta.saveCount=0;
+          if(!D.meta.savedFolder) D.meta.savedFolder='';
+          if(!D.expenses) D.expenses=[];
+          if(!D.journal) D.journal=[];
+          if(!D.documents) D.documents=defaultData().documents;
+          if(!D.risks) D.risks=defaultData().risks;
+          if(!D.lots) D.lots=defaultData().lots;
+          if(!D.payments) D.payments=defaultData().payments;
+          if(!D.subPayments) D.subPayments=[];
+          if(!D.users) D.users=[];
+          // Always migrate equipment products
+          migrateEquipments();
+          // Renumber equipment sequentially
+          D.equipments.forEach((e,i)=>{ if(typeof e.id==='number'&&e.id>10000) e.seq=i+1; else e.seq=e.seq||i+1; });
+          // Persist & refresh
+          localStorage.setItem('arsat_v3',JSON.stringify(D));
+          updateHeader();
+          render();
+          showExportSuccess('✅ Import réussi : '+equCount+' équipements, '+taskCount+' tâches chargés depuis '+file.name);
+        }
+      );
+    }catch(err){
+      console.error(err);
+      alert('❌ Erreur lors de l\'import.\nVérifiez que le fichier est un JSON valide exporté depuis cet outil.\n\nDétail : '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+
+// ═══ TRÉSORERIE – CASH FLOW PRESTATAIRES ════════════════════════════
+function renderTresorerie(){
+  if(!D.subPayments) D.subPayments=[];
+  const sp=D.subPayments;
+  const entrees=sp.filter(p=>p.type==='entree');
+  const sorties=sp.filter(p=>p.type==='sortie');
+  const totalEntrees=entrees.reduce((s,p)=>s+(+p.amount||0),0);
+  const totalSorties=sorties.reduce((s,p)=>s+(+p.amount||0),0);
+  const solde=totalEntrees-totalSorties;
+  const soldeColor=solde>=0?COLOR.ok:COLOR.danger;
+
+  // ARSAT payments as automatic entries
+  const arsatPaid=(D.payments||[]).filter(p=>p.status==='paid');
+  const arsatTotal=arsatPaid.reduce((s,p)=>s+(+p.amount||0),0);
+
+  const cats=['Gros Œuvre','Second Œuvre','Lot CFO','Lot CFA','Lot HVAC','Lot Incendie','Lot Plomberie','Lot Gaz','Lot VSS/Accès','Équipements','Études','Formation','HSE','Frais généraux','Autre'];
+  const prestataires=['MENARA GLOBAL SERVICE','Sous-traitant CFO','Sous-traitant CFA','Sous-traitant HVAC','Sous-traitant Incendie','Sous-traitant Plomberie','Sous-traitant Gaz','MAT-LIB','ROFA','Normalab','Metrohm','Koehl','Lovibond','MEMMERT','Bureau d\'études','Autre'];
+
+  const rows=sp.slice().reverse().map((p,i)=>{
+    const idx=sp.length-1-i;
+    const late=p.dueDate&&p.dueDate<today()&&p.status!=='paid';
+    return `<tr style="border-left:3px solid ${p.type==='entree'?COLOR.ok:COLOR.danger}">
+      <td style="font-size:9px;color:#64748b">${fmtDate(p.date)}</td>
+      <td><span class="badge" style="background:${p.type==='entree'?'#f0fdf4':'#fff5f5'};color:${p.type==='entree'?COLOR.ok:COLOR.danger}">${p.type==='entree'?'⬇ Entrée':'⬆ Sortie'}</span></td>
+      <td style="font-weight:600">${p.label}</td>
+      <td style="color:#64748b;font-size:9px">${p.category||'–'}</td>
+      <td style="color:#64748b;font-size:9px">${p.prestataire||'–'}</td>
+      <td style="font-weight:700;color:${p.type==='entree'?COLOR.ok:COLOR.danger};text-align:right">${p.type==='entree'?'+':'–'} ${fmt(+p.amount||0)} FCFA</td>
+      <td style="font-size:9px;color:${late?COLOR.danger:''};white-space:nowrap">${fmtDate(p.dueDate)||'–'}${late?' ⚠':''}</td>
+      <td>
+        <select onchange="updateSubPayStatus(${idx},this.value)" style="width:100px;border-radius:4px;padding:2px 4px;font-size:9px;font-family:inherit;border:1px solid #e2e8f0">
+          <option value="pending" ${p.status==='pending'?'selected':''}>En attente</option>
+          <option value="invoiced" ${p.status==='invoiced'?'selected':''}>Facturé</option>
+          <option value="paid" ${p.status==='paid'?'selected':''}>Payé ✓</option>
+          <option value="overdue" ${p.status==='overdue'?'selected':''}>En retard</option>
+        </select>
+      </td>
+      <td style="font-size:9px;color:#64748b;max-width:100px">${p.note||''}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteSubPay(${idx})">🗑</button></td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px">
+    ${kpiCard('⬇','Entrées ARSAT (versé)',fmt(arsatTotal)+' FCFA',arsatPaid.length+' versements reçus',COLOR.ok)}
+    ${kpiCard('⬆','Sorties prestataires',fmt(totalSorties)+' FCFA',sorties.filter(p=>p.status!=='paid').length+' en attente',COLOR.danger)}
+    ${kpiCard('💰','Solde disponible',fmt(solde)+' FCFA',solde>=0?'Situation saine':'⚠ DÉFICIT',soldeColor)}
+    ${kpiCard('📊','Budget restant ARSAT',fmt(4860681781-arsatTotal)+' FCFA','sur 4,861 Md TTC',COLOR.info)}
+  </div>
+
+  <!-- Barre visuelle -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title" style="color:#334155">📊 Flux financiers – Vision globale</div>
+    <div style="margin-bottom:6px;font-size:10px;display:flex;justify-content:space-between">
+      <span style="color:${COLOR.ok}">⬇ Entrées ARSAT : <strong>${fmt(arsatTotal)} FCFA</strong></span>
+      <span style="color:${COLOR.danger}">⬆ Sorties prestataires : <strong>${fmt(totalSorties)} FCFA</strong></span>
+    </div>
+    <div style="background:#f1f5f9;border-radius:6px;height:18px;position:relative;overflow:hidden">
+      <div style="position:absolute;left:0;top:0;height:100%;width:${Math.min(100,(arsatTotal/4860681781)*100)}%;background:#86efac;border-radius:6px"></div>
+      <div style="position:absolute;left:0;top:0;height:100%;width:${Math.min(100,(totalSorties/4860681781)*100)}%;background:#fca5a5;border-radius:6px;opacity:.7"></div>
+    </div>
+    <div style="font-size:9px;color:#64748b;margin-top:4px;display:flex;justify-content:space-between">
+      <span>${((arsatTotal/4860681781)*100).toFixed(1)}% du budget encaissé</span>
+      <span>${((totalSorties/4860681781)*100).toFixed(1)}% du budget décaissé</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn btn-primary btn-sm" onclick="openSubPayModal('entree')">⬇ Enregistrer une entrée</button>
+    <button class="btn btn-ghost btn-sm" style="border-color:${COLOR.danger};color:${COLOR.danger}" onclick="openSubPayModal('sortie')">⬆ Enregistrer une sortie</button>
+    <span style="color:#64748b;font-size:9px;margin-left:auto">${sp.length} mouvement(s) enregistré(s)</span>
+  </div>
+
+  <!-- Tableau des mouvements -->
+  <div class="card" style="padding:0">
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Date</th><th>Type</th><th>Libellé</th><th>Catégorie</th><th>Prestataire</th>
+        <th>Montant FCFA</th><th>Échéance</th><th>Statut</th><th>Note</th><th></th>
+      </tr></thead>
+      <tbody>
+      ${rows||`<tr><td colspan="10" style="text-align:center;color:#64748b;padding:20px">Aucun mouvement enregistré. Commencez par enregistrer une entrée ou une sortie.</td></tr>`}
+      </tbody>
+      <tfoot>
+        <tr style="background:#f8fafc;border-top:2px solid #e2e8f0">
+          <td colspan="5" style="padding:8px;font-weight:700;color:#334155">SOLDE NET</td>
+          <td style="padding:8px;font-weight:700;color:${soldeColor};text-align:right;font-size:13px">${solde>=0?'+':''} ${fmt(solde)} FCFA</td>
+          <td colspan="4"></td>
+        </tr>
+      </tfoot>
+    </table></div>
+  </div>
+
+  <!-- Alertes déficit -->
+  ${solde<0?`<div class="alert alert-danger">🚨 DÉFICIT de ${fmt(Math.abs(solde))} FCFA — Les sorties dépassent les entrées. Vérifiez les versements ARSAT en attente.</div>`:''}
+  ${sp.filter(p=>p.dueDate&&p.dueDate<today()&&p.status!=='paid').length>0?`<div class="alert alert-warn">⚠ ${sp.filter(p=>p.dueDate&&p.dueDate<today()&&p.status!=='paid').length} paiement(s) prestataire en retard.</div>`:''}
+  `;
+}
+
+function openSubPayModal(type){
+  const cats=['Gros Œuvre','Second Œuvre','Lot CFO','Lot CFA','Lot HVAC','Lot Incendie','Lot Plomberie','Lot Gaz','Lot VSS/Accès','Équipements','Études','Formation','HSE','Frais généraux','Autre'];
+  const isEntree=type==='entree';
+  document.getElementById('modal-payment-body').innerHTML=`
+    <h3 style="color:${isEntree?COLOR.ok:COLOR.danger}">${isEntree?'⬇ Nouvelle entrée':'⬆ Nouvelle sortie'}</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Date</label><input type="date" id="sp-date" value="${today()}"></div>
+      <div class="form-row"><label>Échéance</label><input type="date" id="sp-due"></div>
+      <div class="form-row" style="grid-column:1/-1"><label>Libellé *</label><input type="text" id="sp-label" placeholder="${isEntree?'Ex: Versement ARSAT – démarrage chantier':'Ex: Acompte MENARA – gros œuvre'}"></div>
+      <div class="form-row"><label>Catégorie</label><select id="sp-cat">${cats.map(cc=>`<option>${cc}</option>`).join('')}</select></div>
+      <div class="form-row"><label>Prestataire</label><input type="text" id="sp-prest" placeholder="${isEntree?'ARSAT':'Ex: MENARA, MAT-LIB...'}"></div>
+      <div class="form-row">
+        <label>Montant (FCFA) *</label>
+        <input type="number" id="sp-amount" placeholder="0" min="0" style="border-color:${isEntree?COLOR.ok:COLOR.danger}">
+      </div>
+      <div class="form-row">
+        <label>= EUR (indicatif)</label>
+        <input type="number" id="sp-eur" placeholder="0" min="0" oninput="document.getElementById('sp-amount').value=Math.round(this.value*${EUR_XAF})" style="color:#64748b">
+      </div>
+      <div class="form-row"><label>Statut</label><select id="sp-status"><option value="pending">En attente</option><option value="invoiced">Facturé</option><option value="paid">Payé</option></select></div>
+      <div class="form-row"><label>N° facture / référence</label><input type="text" id="sp-ref" placeholder="FAC-2026-..."></div>
+      <div class="form-row" style="grid-column:1/-1"><label>Note</label><textarea id="sp-note" style="min-height:40px" placeholder="Informations complémentaires..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-payment')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveSubPay('${type}')">💾 Enregistrer</button>
+    </div>`;
+  openModal('modal-payment');
+}
+
+function saveSubPay(type){
+  const label=v('sp-label').trim();
+  const amount=+v('sp-amount')||0;
+  if(!label){alert('Le libellé est obligatoire.');return;}
+  if(!amount){alert('Le montant est obligatoire.');return;}
+  if(!D.subPayments) D.subPayments=[];
+  D.subPayments.push({
+    type,label,amount,
+    date:v('sp-date')||today(),
+    dueDate:v('sp-due')||'',
+    category:v('sp-cat')||'',
+    prestataire:v('sp-prest')||'',
+    status:v('sp-status')||'pending',
+    ref:v('sp-ref')||'',
+    note:v('sp-note')||'',
+  });
+  save((type==='entree'?'Entrée':'Sortie')+' trésorerie: '+label+' – '+fmt(amount)+' FCFA');
+  closeModal('modal-payment');
+  render();
+}
+
+function updateSubPayStatus(idx,val){
+  if(D.subPayments[idx]) D.subPayments[idx].status=val;
+  save('Statut paiement: '+val);
+}
+
+function deleteSubPay(idx){
+  const p=D.subPayments[idx];
+  if(!p)return;
+  confirmDialog(`Supprimer le mouvement "<strong>${p.label}</strong>" (${fmt(p.amount)} FCFA) ?`,()=>{
+    D.subPayments.splice(idx,1);save('Suppression mouvement trésorerie');render();
+  });
+}
+
+// ═══ ADMIN – User Management ══════════════════════════════════════════
+function renderAdmin(){
+  if(!CURRENT_USER||CURRENT_USER.role!=='admin'){
+    return `<div class="card" style="text-align:center;padding:40px;color:#64748b">
+      🔐 Accès réservé aux administrateurs.<br>Connectez-vous avec un compte administrateur.
+    </div>`;
+  }
+  const users=D.users||DEFAULT_USERS;
+  const roles={admin:'Administrateur',edit:'Éditeur',view:'Lecture seule'};
+
+  return `
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">🔐 Gestion des utilisateurs & accès
+      <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Ajouter un utilisateur</button>
+    </div>
+    <div class="alert alert-info" style="margin-bottom:10px">
+      ℹ Les rôles : <strong>Administrateur</strong> = accès complet + gestion utilisateurs | <strong>Éditeur</strong> = modification de toutes les données | <strong>Lecture seule</strong> = consultation uniquement, aucune modification
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Nom</th><th>Rôle</th><th>Code PIN</th><th>Dernière connexion</th><th>Actif</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+      ${users.map((u,i)=>`<tr>
+        <td style="color:#64748b">${i+1}</td>
+        <td style="font-weight:700">${u.name}${u.id===CURRENT_USER?.id?' <span class="badge" style="background:#dbeafe;color:#1e40af">Vous</span>':''}</td>
+        <td><span class="badge" style="background:${u.role==='admin'?'#fef3c7':u.role==='edit'?'#f0fdf4':'#f1f5f9'};color:${u.role==='admin'?'#92400e':u.role==='edit'?'#16a34a':'#64748b'}">${roles[u.role]||u.role}</span></td>
+        <td style="font-family:monospace;letter-spacing:4px;color:#64748b">${'•'.repeat(u.pin?.length||4)}</td>
+        <td style="font-size:9px;color:#64748b">${u.lastLogin||'Jamais connecté'}</td>
+        <td><span class="badge" style="background:${u.active?'#f0fdf4':'#f1f5f9'};color:${u.active?'#16a34a':'#64748b'}">${u.active?'✓ Actif':'Inactif'}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="openUserModal(${i})">✏</button>
+          ${u.id!==CURRENT_USER?.id?`<button class="btn btn-danger btn-sm" onclick="toggleUser(${i})">
+            ${u.active?'Désactiver':'Activer'}</button>`:'' }
+        </td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙ Paramètres du projet</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Nom du projet</label>
+        <input type="text" id="cfg-projname" value="Laboratoire ARSAT – N'Djamena">
+      </div>
+      <div class="form-row">
+        <label>Référence marché</label>
+        <input type="text" id="cfg-ref" value="25118-GE">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn btn-ghost btn-sm" onclick="clearAllData()">🗑 Réinitialiser toutes les données</button>
+    </div>
+  </div>`;
+}
+
+function openUserModal(idx){
+  const users=D.users||[];
+  const isEdit=idx!==undefined;
+  const u=isEdit?users[idx]:{id:Date.now(),name:'',role:'edit',pin:'',active:true,lastLogin:''};
+  document.getElementById('modal-task-body').innerHTML=`
+    <h3>${isEdit?'Modifier':'Ajouter'} un utilisateur</h3>
+    <div class="form-grid">
+      <div class="form-row" style="grid-column:1/-1"><label>Nom complet *</label><input type="text" id="u-name" value="${u.name}" placeholder="Ex: Chef de Projet WISE"></div>
+      <div class="form-row"><label>Rôle</label>
+        <select id="u-role">
+          <option value="admin" ${u.role==='admin'?'selected':''}>Administrateur</option>
+          <option value="edit" ${u.role==='edit'?'selected':''}>Éditeur</option>
+          <option value="view" ${u.role==='view'?'selected':''}>Lecture seule</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Code PIN (4-6 chiffres) *</label>
+        <input type="password" id="u-pin" value="${u.pin}" placeholder="••••" maxlength="6" style="letter-spacing:6px;font-size:16px">
+      </div>
+      <div class="form-row"><label>Actif</label>
+        <select id="u-active">
+          <option value="true" ${u.active?'selected':''}>Oui – peut se connecter</option>
+          <option value="false" ${!u.active?'selected':''}>Non – accès bloqué</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-task')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveUser(${isEdit?idx:'null'})">💾 Enregistrer</button>
+    </div>`;
+  openModal('modal-task');
+}
+
+function saveUser(idx){
+  const name=v('u-name').trim();
+  const pin=v('u-pin').trim();
+  if(!name){alert('Le nom est obligatoire.');return;}
+  if(!pin||pin.length<4){alert('Le PIN doit contenir au moins 4 chiffres.');return;}
+  if(!D.users) D.users=[];
+  if(idx===null||idx===undefined||idx==='null'){
+    D.users.push({id:Date.now(),name,role:v('u-role'),pin,active:v('u-active')==='true',lastLogin:''});
+  } else {
+    const u=D.users[+idx];
+    if(u){u.name=name;u.role=v('u-role');u.pin=pin;u.active=v('u-active')==='true';}
+  }
+  save('Gestion utilisateur: '+name);closeModal('modal-task');render();
+}
+
+function toggleUser(idx){
+  const u=(D.users||[])[idx];
+  if(u){u.active=!u.active;save('Toggle user: '+u.name);render();}
+}
+
+function clearAllData(){
+  if(CURRENT_USER?.role!=='admin'){alert('Réservé aux administrateurs.');return;}
+  confirmDialog('<strong>⚠ Réinitialiser TOUTES les données ?</strong><br><br>Cette action supprimera tous vos enregistrements (tâches, équipements, paiements, journal...).<br>Faites un export JSON avant de continuer.<br><br><span style="color:#dc2626;font-weight:700">Action irréversible.</span>',()=>{
+    const users=D.users;
+    D=defaultData();
+    D.users=users;
+    localStorage.setItem('arsat_v3',JSON.stringify(D));
+    updateHeader();render();
+    showExportSuccess('✅ Données réinitialisées. Les utilisateurs ont été conservés.');
+  });
+}
+
+
+// ─── UNDO SYSTEM ────────────────────────────────────────────────────
+const UNDO_STACK = [];
+const MAX_UNDO = 10;
+
+function pushUndo(description){
+  UNDO_STACK.push({
+    description: description,
+    timestamp: new Date().toLocaleTimeString('fr-FR'),
+    snapshot: JSON.stringify(D)
+  });
+  if(UNDO_STACK.length>MAX_UNDO) UNDO_STACK.shift();
+  updateUndoBtn();
+}
+
+function undoLast(){
+  if(!UNDO_STACK.length){alert('Aucune action à annuler.');return;}
+  const last=UNDO_STACK.pop();
+  confirmDialog(
+    `<strong>Annuler : "${last.description}"</strong><br>
+    <span style="font-size:10px;color:#64748b">Action effectuée à ${last.timestamp}<br>
+    Les données seront restaurées à l'état précédent.</span>`,
+    ()=>{
+      D=JSON.parse(last.snapshot);
+      localStorage.setItem('arsat_v3',JSON.stringify(D));
+      updateHeader();render();
+      showExportSuccess('↩ Annulation effectuée : '+last.description);
+      updateUndoBtn();
+    }
+  );
+}
+
+function updateUndoBtn(){
+  const btn=document.getElementById('undo-btn');
+  if(!btn)return;
+  if(UNDO_STACK.length>0){
+    const last=UNDO_STACK[UNDO_STACK.length-1];
+    btn.title='Annuler : '+last.description+' ('+last.timestamp+')';
+    btn.style.opacity='1';
+    btn.style.pointerEvents='auto';
+    btn.textContent='↩ Annuler ('+UNDO_STACK.length+')';
+  } else {
+    btn.title='Aucune action à annuler';
+    btn.style.opacity='.4';
+    btn.style.pointerEvents='none';
+    btn.textContent='↩ Annuler';
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// MODE SERVEUR CENTRALISÉ – API REST
+// ══════════════════════════════════════════════════════════════════════
+const API = window.location.origin; // auto-detect server URL
+let TOKEN = localStorage.getItem('arsat_token') || '';
+let CURRENT_USER = null;
+
+// ─── API helpers ─────────────────────────────────────────────────────
+async function apiGet(url) {
+  const r = await fetch(API+url, { headers: { Authorization: 'Bearer '+TOKEN } });
+  if (r.status === 401 || r.status === 403) {
+    const body = await r.json();
+    if (body.revoked) {
+      alert('⛔ Votre compte a été désactivé par l\'administrateur.\nContactez le Chef de Projet.');
+    } else {
+      alert('⏱ Session expirée. Reconnectez-vous.');
+    }
+    logout();
+    return null;
+  }
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function apiPost(url, body) {
+  const r = await fetch(API+url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer '+TOKEN },
+    body: JSON.stringify(body)
+  });
+  if (r.status === 401 || r.status === 403) {
+    const b = await r.json();
+    if (b.revoked) { alert('⛔ Votre compte a été désactivé.'); logout(); }
+    else alert(b.error || 'Accès refusé');
+    return null;
+  }
+  return r.json();
+}
+
+async function apiPut(url, body) {
+  const r = await fetch(API+url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer '+TOKEN },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+async function apiDelete(url) {
+  const r = await fetch(API+url, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer '+TOKEN }
+  });
+  return r.json();
+}
+
+// ─── Save overridden to use server ───────────────────────────────────
+async function save(description) {
+  if (window._viewOnly) { console.warn('Save blocked – view only'); return; }
+  D.meta.lastUpdated = today();
+  if (!D.meta.history) D.meta.history = [];
+  if (!D.meta.saveCount) D.meta.saveCount = 0;
+  D.meta.saveCount++;
+  const tasks = D.tasks || [];
+  const avg = tasks.length ? Math.round(tasks.reduce((s,t)=>s+t.progress,0)/tasks.length) : 0;
+  D.meta.history.unshift({
+    id: D.meta.saveCount, datetime: new Date().toLocaleString('fr-FR'),
+    date: today(), description: description||'Mise à jour', avancement: avg+'%',
+    risquesOuverts: (D.risks||[]).filter(r=>r.status==='open').length,
+    tachesTerminees: tasks.filter(t=>t.progress===100).length+'/'+tasks.length,
+  });
+  D.meta.history = D.meta.history.slice(0,5);
+  // Save to server
+  const result = await apiPost('/api/data', { data: D, description });
+  if (result?.ok) {
+    updateHeader();
+    showSaveNotif();
+  }
+}
+
+// ─── Login screen ─────────────────────────────────────────────────────
+async function showLoginScreen() {
+  document.getElementById('content').innerHTML = '';
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('header').style.display = 'none';
+  document.body.style.background = 'linear-gradient(135deg,#1e3a5f,#1e40af)';
+
+  // Fetch active users from server
+  let users = [];
+  try {
+    const r = await fetch(API+'/api/users/list');
+    users = await r.json();
+  } catch(e) {
+    // If server unreachable, show error
+    document.body.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif">
+      <div style="background:white;border-radius:12px;padding:32px;max-width:400px;text-align:center">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:16px;font-weight:700;color:#dc2626;margin-bottom:8px">Serveur inaccessible</div>
+        <div style="font-size:12px;color:#64748b">Impossible de joindre le serveur ARSAT.<br>Vérifiez votre connexion internet.</div>
+        <button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;background:#1e40af;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px">Réessayer</button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const login = document.createElement('div');
+  login.id = 'login-screen';
+  login.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center">
+      <div style="background:white;border-radius:16px;padding:36px 32px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.3);text-align:center">
+        <div style="width:64px;height:64px;background:#f59e0b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px">⚗</div>
+        <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px">LABO ARSAT</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:24px">Outil de Gestion de Projet<br>Réf. 25118-GE • N'Djamena, Tchad</div>
+        <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:6px;text-align:left">Utilisateur</div>
+        <select id="login-user" style="width:100%;padding:9px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:12px;margin-bottom:12px;color:#1e293b">
+          ${users.map(u=>`<option value="${u.id}">${u.name} (${u.role==='admin'?'Administrateur':u.role==='edit'?'Éditeur':'Lecture seule'})</option>`).join('')}
+        </select>
+        <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:6px;text-align:left">Code PIN</div>
+        <input type="password" id="login-pin" maxlength="6" placeholder="••••"
+          style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:20px;letter-spacing:8px;text-align:center;margin-bottom:6px;color:#1e293b"
+          onkeydown="if(event.key==='Enter')doLogin()">
+        <div id="login-err" style="font-size:10px;color:#dc2626;min-height:16px;margin-bottom:10px"></div>
+        <button onclick="doLogin()" id="login-btn" style="width:100%;padding:11px;background:#f59e0b;color:#1c1917;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">
+          🔐 ACCÉDER AU TABLEAU DE BORD
+        </button>
+        <div style="font-size:9px;color:#94a3b8;margin-top:16px">🔒 Connexion sécurisée • Données centralisées sur serveur</div>
+        <div style="font-size:9px;color:#94a3b8">ARSAT – WISE GROUP / MENARA GLOBAL SERVICE</div>
+      </div>
+    </div>`;
+  document.body.appendChild(login);
+  setTimeout(() => document.getElementById('login-pin')?.focus(), 100);
+}
+
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-err');
+  btn.textContent = '⏳ Connexion...';
+  btn.disabled = true;
+  try {
+    const r = await fetch(API+'/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: +document.getElementById('login-user').value,
+        pin:    document.getElementById('login-pin').value
+      })
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      errEl.textContent = data.error || 'Erreur de connexion';
+      document.getElementById('login-pin').value = '';
+      document.getElementById('login-pin').focus();
+      btn.textContent = '🔐 ACCÉDER AU TABLEAU DE BORD';
+      btn.disabled = false;
+      return;
+    }
+    // Success
+    TOKEN = data.token;
+    CURRENT_USER = data.user;
+    localStorage.setItem('arsat_token', TOKEN);
+    window._viewOnly = (CURRENT_USER.role === 'view');
+
+    // Load data from server
+    const dataResult = await apiGet('/api/data');
+    if (dataResult) {
+      D = dataResult.data || defaultData();
+      migrateEquipments();
+      if (!D.expenses) D.expenses=[];
+      if (!D.journal) D.journal=[];
+      if (!D.subPayments) D.subPayments=[];
+    } else {
+      D = defaultData();
+    }
+
+    // Show app
+    document.getElementById('login-screen').remove();
+    document.body.style.background = '';
+    document.getElementById('nav').style.display = 'flex';
+    document.getElementById('header').style.display = 'flex';
+    const adminBtn = document.getElementById('nav-admin');
+    if (adminBtn) adminBtn.style.display = CURRENT_USER.role==='admin'?'':'none';
+
+    // Add user badge
+    const userBadge = document.createElement('div');
+    userBadge.id = 'user-badge';
+    userBadge.style.cssText = 'display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;font-size:10px;color:white';
+    userBadge.innerHTML = `👤 <strong>${CURRENT_USER.name}</strong> &nbsp;|&nbsp; <button onclick="logout()" style="background:none;border:none;color:#fcd34d;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700">Déconnexion</button>`;
+    document.getElementById('header').appendChild(userBadge);
+
+    updateHeader();
+    render();
+    setTimeout(updateUndoBtn, 100);
+
+  } catch(e) {
+    errEl.textContent = 'Erreur réseau – vérifiez votre connexion';
+    btn.textContent = '🔐 ACCÉDER AU TABLEAU DE BORD';
+    btn.disabled = false;
+  }
+}
+
+function logout() {
+  TOKEN = '';
+  CURRENT_USER = null;
+  window._viewOnly = false;
+  localStorage.removeItem('arsat_token');
+  const badge = document.getElementById('user-badge');
+  if (badge) badge.remove();
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('header').style.display = 'none';
+  showLoginScreen();
+}
+
+function canEdit() { return !window._viewOnly; }
+
+// ─── Admin: server-side user management ──────────────────────────────
+function renderAdmin() {
+  if (!CURRENT_USER || CURRENT_USER.role !== 'admin') {
+    return `<div class="card" style="text-align:center;padding:40px;color:#64748b">
+      🔐 Accès réservé aux administrateurs.
+    </div>`;
+  }
+  // Load users from server asynchronously
+  loadAdminUsers();
+  return `
+  <div class="card" id="admin-users-card">
+    <div class="card-title">🔐 Gestion des utilisateurs – Contrôle d'accès centralisé
+      <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Ajouter</button>
+    </div>
+    <div class="alert alert-info" style="margin-bottom:10px">
+      🔒 <strong>Accès en temps réel :</strong> Désactiver un compte prend effet <strong>immédiatement</strong> – même pour les sessions déjà ouvertes. La prochaine action de l'utilisateur échouera et il sera déconnecté.
+    </div>
+    <div id="users-table-container" style="text-align:center;padding:20px;color:#64748b">
+      ⏳ Chargement...
+    </div>
+  </div>
+  <div class="card" id="admin-audit-card">
+    <div class="card-title">📋 Journal d'audit – Toutes les actions utilisateurs</div>
+    <div id="audit-table-container" style="text-align:center;padding:20px;color:#64748b">⏳ Chargement...</div>
+  </div>`;
+}
+
+async function loadAdminUsers() {
+  try {
+    const users = await apiGet('/api/users');
+    if (!users) return;
+    const roles = { admin:'Administrateur', edit:'Éditeur', view:'Lecture seule' };
+    const container = document.getElementById('users-table-container');
+    if (!container) return;
+    container.innerHTML = `<div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>#</th><th>Nom</th><th>Rôle</th><th>Dernière connexion</th><th>Statut</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+      ${users.map((u,i) => `<tr>
+        <td style="color:#64748b">${i+1}</td>
+        <td style="font-weight:700">${u.name}${u.id===CURRENT_USER?.id?' <span class="badge" style="background:#dbeafe;color:#1e40af">Vous</span>':''}</td>
+        <td><span class="badge" style="background:${u.role==='admin'?'#fef3c7':u.role==='edit'?'#f0fdf4':'#f1f5f9'};color:${u.role==='admin'?'#92400e':u.role==='edit'?'#16a34a':'#64748b'}">${roles[u.role]||u.role}</span></td>
+        <td style="font-size:9px;color:#64748b">${u.lastLogin||'Jamais'}</td>
+        <td><span class="badge" style="background:${u.active?'#f0fdf4':'#fff5f5'};color:${u.active?'#16a34a':'#dc2626'}">${u.active?'✓ Actif':'⛔ Désactivé'}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="openUserModal(${u.id},'${u.name}','${u.role}',${u.active})">✏ Modifier</button>
+          ${u.id!==CURRENT_USER?.id?`<button class="btn btn-danger btn-sm" onclick="toggleUserServer(${u.id},${!u.active})">${u.active?'⛔ Désactiver':'✅ Activer'}</button>`:''}
+        </td>
+      </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+
+    // Load audit log
+    const auditLog = await apiGet('/api/audit');
+    const auditContainer = document.getElementById('audit-table-container');
+    if (auditContainer && auditLog) {
+      auditContainer.innerHTML = auditLog.length ? `<div style="overflow-x:auto;max-height:300px;overflow-y:auto"><table>
+        <thead><tr><th>Date & Heure</th><th>Utilisateur</th><th>Rôle</th><th>Action</th></tr></thead>
+        <tbody>${auditLog.map(a=>`<tr>
+          <td style="font-size:9px;white-space:nowrap;color:#64748b">${a.date}</td>
+          <td style="font-weight:600">${a.user}</td>
+          <td><span class="badge" style="background:#f1f5f9;color:#64748b;font-size:8px">${a.role}</span></td>
+          <td style="font-size:10px">${a.action||'–'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>` : '<div style="color:#64748b;font-size:10px">Aucune action enregistrée.</div>';
+    }
+  } catch(e) {
+    const c = document.getElementById('users-table-container');
+    if (c) c.innerHTML = '<div style="color:#dc2626">Erreur chargement utilisateurs.</div>';
+  }
+}
+
+function openUserModal(id, name, role, active) {
+  const isEdit = id !== undefined;
+  document.getElementById('modal-task-body').innerHTML = `
+    <h3>${isEdit?'Modifier':'Ajouter'} un utilisateur</h3>
+    <div class="form-grid">
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Nom complet *</label>
+        <input type="text" id="u-name" value="${name||''}" placeholder="Ex: Chef de Projet WISE">
+      </div>
+      <div class="form-row">
+        <label>Rôle</label>
+        <select id="u-role">
+          <option value="admin" ${role==='admin'?'selected':''}>Administrateur – accès complet</option>
+          <option value="edit"  ${role==='edit'||!role?'selected':''}>Éditeur – peut modifier</option>
+          <option value="view"  ${role==='view'?'selected':''}>Lecture seule – consultation</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>${isEdit?'Nouveau PIN (laisser vide = inchangé)':'Code PIN * (4-6 chiffres)'}</label>
+        <input type="password" id="u-pin" placeholder="••••" maxlength="6" style="letter-spacing:6px;font-size:16px">
+      </div>
+      ${isEdit?`<div class="form-row">
+        <label>Statut du compte</label>
+        <select id="u-active">
+          <option value="true"  ${active?'selected':''}>✅ Actif – peut se connecter</option>
+          <option value="false" ${!active?'selected':''}>⛔ Désactivé – accès bloqué</option>
+        </select>
+      </div>`:''}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-task')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveUserServer(${id||'null'})">💾 Enregistrer</button>
+    </div>`;
+  openModal('modal-task');
+}
+
+async function saveUserServer(id) {
+  const name = v('u-name').trim();
+  const pin  = v('u-pin').trim();
+  const role = v('u-role');
+  const activeEl = document.getElementById('u-active');
+  const active = activeEl ? activeEl.value === 'true' : true;
+
+  if (!name) { alert('Le nom est obligatoire.'); return; }
+  if (!id && pin.length < 4) { alert('Le PIN doit avoir au moins 4 chiffres.'); return; }
+
+  const body = { name, role, active };
+  if (pin) body.pin = pin;
+
+  let result;
+  if (id && id !== 'null') {
+    result = await apiPut('/api/users/'+id, body);
+  } else {
+    if (!pin) { alert('Le PIN est obligatoire pour un nouvel utilisateur.'); return; }
+    result = await apiPost('/api/users', body);
+  }
+
+  if (result?.ok) {
+    showExportSuccess('✅ Utilisateur sauvegardé : '+name);
+    closeModal('modal-task');
+    render(); // Re-render admin tab
+  } else {
+    alert('Erreur : '+(result?.error||'Inconnue'));
+  }
+}
+
+async function toggleUserServer(id, newActive) {
+  const result = await apiPut('/api/users/'+id, { active: newActive });
+  if (result?.ok) {
+    showExportSuccess(newActive ? '✅ Compte activé' : '⛔ Compte désactivé – prend effet immédiatement');
+    render();
+  }
+}
+
+// ─── Export override: still download JSON ────────────────────────────
+async function doExport() {
+  const filename = (document.getElementById('ex-filename')?.value || 'ARSAT_Labo_'+today()+'.json').replace(/[^a-z0-9_\-\.]/gi,'_');
+  const desc = document.getElementById('ex-desc')?.value || 'Export manuel';
+  await save(desc);
+  const blob = new Blob([JSON.stringify(D,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  closeModal('modal-export');
+  showExportSuccess('✅ Fichier téléchargé : '+filename);
+}
+
+// ─── Import override: load to server ────────────────────────────────
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.meta || !data.tasks) { alert('Fichier invalide'); return; }
+      confirmDialog(`Importer "${file.name}" sur le serveur ?<br>
+        <span style="font-size:9px;color:#64748b">Cela remplacera les données pour TOUS les utilisateurs connectés.</span>`,
+        async () => {
+          D = data;
+          migrateEquipments();
+          if (!D.expenses) D.expenses=[];
+          if (!D.subPayments) D.subPayments=[];
+          await save('Import fichier: '+file.name);
+          updateHeader(); render();
+          showExportSuccess('✅ Données importées sur le serveur depuis '+file.name);
+        }
+      );
+    } catch(e) { alert('Erreur import: '+e.message); }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// ─── Auto-reconnect on load if token exists ──────────────────────────
+async function tryAutoLogin() {
+  if (!TOKEN) { showLoginScreen(); return; }
+  try {
+    const r = await apiGet('/api/check');
+    if (!r) { showLoginScreen(); return; }
+    CURRENT_USER = r.user;
+    window._viewOnly = (CURRENT_USER.role === 'view');
+    // Load data
+    const dataResult = await apiGet('/api/data');
+    D = dataResult?.data || defaultData();
+    migrateEquipments();
+    if (!D.expenses) D.expenses=[];
+    if (!D.subPayments) D.subPayments=[];
+    document.getElementById('nav').style.display = 'flex';
+    document.getElementById('header').style.display = 'flex';
+    const adminBtn = document.getElementById('nav-admin');
+    if (adminBtn) adminBtn.style.display = CURRENT_USER.role==='admin'?'':'none';
+    // Add user badge
+    const userBadge = document.createElement('div');
+    userBadge.id = 'user-badge';
+    userBadge.style.cssText = 'display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;font-size:10px;color:white';
+    userBadge.innerHTML = `👤 <strong>${CURRENT_USER.name}</strong> &nbsp;|&nbsp; <button onclick="logout()" style="background:none;border:none;color:#fcd34d;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700">Déconnexion</button>`;
+    document.getElementById('header').appendChild(userBadge);
+    updateHeader(); render(); setTimeout(updateUndoBtn,100);
+  } catch(e) {
+    showLoginScreen();
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────
+D = defaultData(); // temp data until server responds
+document.getElementById('nav').style.display = 'none';
+document.getElementById('header').style.display = 'none';
+tryAutoLogin(); // Try auto-login with saved token, else show login screen
+
+}
+
+function canEdit(){return !window._viewOnly;}
+
+// ─── INIT ────────────────────────────────────────────────────────────
+load();
+initUsers();
+document.getElementById('nav').style.display='none';
+document.getElementById('header').style.display='none';
+showLoginScreen();
+</script>
+</body>
+</html>
